@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/assets/logo.png" alt="Audio Converter" width="110" height="110">
+  <img src="docs/assets/logo.png" alt="FFmpeg Audio Studio" width="110" height="110">
 </p>
 
-<h1 align="center">Audio Converter</h1>
+<h1 align="center">FFmpeg Audio Studio</h1>
 
 <div align="center">
   <strong>Convert audio between 18 formats without losing the tags.</strong><br>
@@ -14,12 +14,12 @@
 <!-- readme:nav -->
 
 <div align="center">
-  <a href="../../releases/latest"><img src="https://img.shields.io/github/v/release/yaiol/audio-converter?color=5a4fff&label=release&style=flat-square" alt="Release"></a>
-  <a href="../../releases"><img src="https://img.shields.io/github/downloads/yaiol/audio-converter/total?color=5a4fff&label=downloads&style=flat-square" alt="Downloads"></a>
+  <a href="../../releases/latest"><img src="https://img.shields.io/github/v/release/yaiol/ffmpeg-audio-studio?color=5a4fff&label=release&style=flat-square" alt="Release"></a>
+  <a href="../../releases"><img src="https://img.shields.io/github/downloads/yaiol/ffmpeg-audio-studio/total?color=5a4fff&label=downloads&style=flat-square" alt="Downloads"></a>
 </div>
 
 <h3 align="center">
-  <a href="https://apps.yaiol.com/p/audio-converter/">Website</a>
+  <a href="https://apps.yaiol.com/p/ffmpeg-audio-studio/">Website</a>
   <span>&nbsp;·&nbsp;</span>
   <a href="#install">Install</a>
   <span>&nbsp;·&nbsp;</span>
@@ -31,7 +31,7 @@
 </h3>
 
 <div align="center">
-  <sub><a href="https://apps.yaiol.com/p/audio-converter/help/"><b>Help in 28 languages</b></a></sub>
+  <sub><a href="https://apps.yaiol.com/p/ffmpeg-audio-studio/help/"><b>Help in 28 languages</b></a></sub>
 </div>
 
 <!-- /readme:nav -->
@@ -39,7 +39,7 @@
 ---
 
 <p align="center">
-  <img src="docs/assets/hero.png" alt="Audio Converter with a list of files, the preset, tags and effects choices in the header" width="900">
+  <img src="docs/assets/hero.png" alt="FFmpeg Audio Studio with a list of files, the preset, tags and effects choices in the header" width="900">
 </p>
 
 ---
@@ -76,7 +76,7 @@
 
 ## What it is
 
-Audio Converter turns audio files into another format, in the spirit of fre:ac and MediaHuman: you drop files or folders on the window, pick what the output should be, and convert. Several files run at once, each with its own progress, and a run can be cancelled per file.
+FFmpeg Audio Studio turns audio files into another format, in the spirit of fre:ac and MediaHuman: you drop files or folders on the window, pick what the output should be, and convert. Several files run at once, each with its own progress, and a run can be cancelled per file.
 
 What sets it apart is that three choices are made separately, each from its own drop-down in the header: the **preset** (what the output is), the **tags** setting (which tags and cover are kept) and the **effects** setting (what is done to the sound). One preset can be used with a setting that strips the comments, with another that normalises the volume, or with neither.
 
@@ -99,10 +99,10 @@ What sets it apart is that three choices are made separately, each from its own 
 
 | | |
 |---|---|
-| **User manual** | [Read it online](https://apps.yaiol.com/p/audio-converter/help/) |
-| **What's new** | [Release notes](https://apps.yaiol.com/p/audio-converter/help/releases/) |
-| **Tag name reference** | [Technical reference](https://apps.yaiol.com/p/audio-converter/help/technical-reference/) |
-| **Product page** | [apps.yaiol.com](https://apps.yaiol.com/p/audio-converter/) |
+| **User manual** | [Read it online](https://apps.yaiol.com/p/ffmpeg-audio-studio/help/) |
+| **What's new** | [Release notes](https://apps.yaiol.com/p/ffmpeg-audio-studio/help/releases/) |
+| **Tag name reference** | [Technical reference](https://apps.yaiol.com/p/ffmpeg-audio-studio/help/technical-reference/) |
+| **Product page** | [apps.yaiol.com](https://apps.yaiol.com/p/ffmpeg-audio-studio/) |
 
 ---
 
@@ -111,7 +111,7 @@ What sets it apart is that three choices are made separately, each from its own 
 Requires the Rust toolchain (stable) and, for the installer, the Dioxus CLI (`cargo install dioxus-cli`). The app drives **ffmpeg**, which is not part of the repository and is not bundled: the app downloads the build yaiol has approved into a folder of its own the first time it starts, and never uses an ffmpeg found elsewhere on the machine.
 
 ```bash
-cargo run -p audio-converter                                                    # run in development
+cargo run -p ffmpeg-audio-studio                                                    # run in development
 cargo test                                                      # engine and app tests (the conversion tests need ffmpeg)
 cd app && dx bundle --desktop --release --package-types nsis    # Windows installer → release/
 ```
@@ -153,5 +153,5 @@ Released under the [MIT License](LICENSE).
 The app downloads [ffmpeg](https://ffmpeg.org) as a separate executable from its builders; it is not part of this repository or of the installer and keeps its own licence.
 
 <div align="center">
-  <sub>Audio Converter is part of <a href="https://apps.yaiol.com">yaiol Applications</a>.</sub>
+  <sub>FFmpeg Audio Studio is part of <a href="https://apps.yaiol.com">yaiol Applications</a>.</sub>
 </div>

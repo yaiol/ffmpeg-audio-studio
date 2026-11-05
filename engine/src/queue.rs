@@ -218,8 +218,66 @@ fn worker(inner: Arc<Inner>) {
         };
         let Some((spec, cancel, child)) = job else { return };
         let status = run_job(&inner, &spec, &cancel, &child);
+        if let JobStatus::Failed { reason } = &status {
+            crate::log::error("job", &format!("{reason}\n{spec:#?}"));
+        }
         set_status(&inner, spec.id, status);
     }
+}
+
+/// "(Original)" is a rule, not a preset: this input's own format, at the bitrate it had.
+fn resolved_preset(spec: &JobSpec, probe: &ffmpeg::Probe) -> Result<Preset, String> {
+    if !spec.preset.is_original() {
+        return Ok(spec.preset.clone());
+    }
+    let ext = spec.input.extension().map(|e| e.to_string_lossy().into_owned()).unwrap_or_default();
+    match crate::format::Format::keeping(&probe.codec, &ext) {
+        Some(f) => Ok(Preset::reproducing(f, probe.bitrate_kbps)),
+        None => Err(format!("no output format keeps the codec \"{}\"", probe.codec)),
+    }
+}
+
+/// The arguments of the conversion: one function for the job and for the command the window shows, so the two cannot drift.
+fn assemble_args(spec: &JobSpec, probe: &ffmpeg::Probe, preset: &Preset, output: &Path, plan: &mut crate::effects::EffectsPlan) -> Vec<String> {
+    let name = spec.input.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+    let with_cover = crate::is_audio_file(&name);
+    // The stored list is the user's text; names are split and tidied only here, where they are used.
+    let cleanup = spec.cleanup.clone().normalized();
+    // The INFO ids of a WAV that ffmpeg could not map are not fields in the reference tagger either,
+    // so they are not carried over.
+    let ignored = crate::riff::unmapped_info_keys(&spec.input, &probe.tags);
+    // An M4A holds a few fields in atoms ffmpeg's demuxer does not expose; they are carried by the tag
+    // layer, after the cleaning, so what the entry removes is not brought back.
+    let mut carried: Vec<(String, String)> = crate::tags::source_only_fields(&spec.input, &probe.tags);
+    carried.retain(|(k, _)| !cleanup.drops(&crate::mapping::spellings(k)));
+
+    // What ffmpeg's listing leaves out goes with the effects' tags: after the cleaning in the formats the
+    // tag layer writes, as an ordinary tag argument in those only ffmpeg writes (WavPack, TTA...).
+    plan.tags.splice(0..0, carried.iter().cloned());
+    // The `.lrc` beside the source, when the tag entry asks for it, becomes the lyrics: it is added after the cleaning
+    // and last of all, so it wins over lyrics the source carries (and over a source's `SYLT` read above).
+    if cleanup.embed_lrc {
+        if let Some(text) = crate::lyrics::read_lrc(&spec.input) {
+            plan.tags.push(("LYRICS".to_owned(), text));
+        }
+    }
+    let args = ffmpeg::build_args(&spec.input, output, preset, &cleanup, &probe.tags, &ignored, with_cover, probe.source, plan);
+    args
+}
+
+/// The command a job would run, as one line to paste in a terminal (what the window shows). Reads the file and measures it as a job does;
+/// writes nothing. The album gain is not measured here (it needs the other files of the run).
+pub fn command_line(ffmpeg_path: &Path, spec: &JobSpec) -> Result<String, String> {
+    let probe = ffmpeg::probe(ffmpeg_path, &spec.input)?;
+    let preset = resolved_preset(spec, &probe)?;
+    let output = match destination::resolve_output(&spec.destination, &spec.input, spec.source_root.as_deref(), &probe.tags, preset.format.extension(), crate::destination::Overwrite::Overwrite) {
+        Resolved::Skip(output) | Resolved::Write(output) => output,
+    };
+    let effects = spec.effects.clone().normalized();
+    effects.check()?;
+    let mut plan = crate::preview::plan_for(ffmpeg_path, &spec.input, probe.duration_us as f64 / 1_000_000.0, &effects)?;
+    let args = assemble_args(spec, &probe, &preset, &output, &mut plan);
+    Ok(crate::log::command_line(ffmpeg_path, &args))
 }
 
 fn run_job(inner: &Inner, spec: &JobSpec, cancel: &AtomicBool, child_slot: &Mutex<Option<Child>>) -> JobStatus {
@@ -234,15 +292,9 @@ fn run_job(inner: &Inner, spec: &JobSpec, cancel: &AtomicBool, child_slot: &Mute
         return JobStatus::Cancelled;
     }
 
-    // "(Original)" is a rule, not a preset: this input's own format, at the bitrate it had.
-    let preset = if spec.preset.is_original() {
-        let ext = spec.input.extension().map(|e| e.to_string_lossy().into_owned()).unwrap_or_default();
-        match crate::format::Format::keeping(&probe.codec, &ext) {
-            Some(f) => Preset::reproducing(f, probe.bitrate_kbps),
-            None => return JobStatus::Failed { reason: format!("no output format keeps the codec \"{}\"", probe.codec) },
-        }
-    } else {
-        spec.preset.clone()
+    let preset = match resolved_preset(spec, &probe) {
+        Ok(p) => p,
+        Err(reason) => return JobStatus::Failed { reason },
     };
     let ext = preset.format.extension();
     let output = match destination::resolve_output(&spec.destination, &spec.input, spec.source_root.as_deref(), &probe.tags, ext, spec.overwrite) {
@@ -254,18 +306,6 @@ fn run_job(inner: &Inner, spec: &JobSpec, cancel: &AtomicBool, child_slot: &Mute
             return JobStatus::Failed { reason: format!("cannot create {}: {e}", dir.display()) };
         }
     }
-
-    let name = spec.input.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
-    let with_cover = crate::is_audio_file(&name);
-    // The stored list is the user's text; names are split and tidied only here, where they are used.
-    let cleanup = spec.cleanup.clone().normalized();
-    // The INFO ids of a WAV that ffmpeg could not map are not fields in the reference tagger either,
-    // so they are not carried over.
-    let ignored = crate::riff::unmapped_info_keys(&spec.input, &probe.tags);
-    // An M4A holds a few fields in atoms ffmpeg's demuxer does not expose; they are carried by the tag
-    // layer, after the cleaning, so what the entry removes is not brought back.
-    let mut carried: Vec<(String, String)> = crate::tags::source_only_fields(&spec.input, &probe.tags);
-    carried.retain(|(k, _)| !cleanup.drops(&crate::mapping::spellings(k)));
 
     // The effects that need numbers get them from measuring passes over the source, before the
     // conversion; what they find is turned into exact arguments (see `effects::plan`).
@@ -284,17 +324,7 @@ fn run_job(inner: &Inner, spec: &JobSpec, cancel: &AtomicBool, child_slot: &Mute
     }
     // The percentage is against what will be written, not what was read.
     let total_us = plan.expected_s.map_or(probe.duration_us, |s| (s * 1_000_000.0) as u64);
-    // What ffmpeg's listing leaves out goes with the effects' tags: after the cleaning in the formats the
-    // tag layer writes, as an ordinary tag argument in those only ffmpeg writes (WavPack, TTA...).
-    plan.tags.splice(0..0, carried.iter().cloned());
-    // The `.lrc` beside the source, when the tag entry asks for it, becomes the lyrics: it is added after the cleaning
-    // and last of all, so it wins over lyrics the source carries (and over a source's `SYLT` read above).
-    if cleanup.embed_lrc {
-        if let Some(text) = crate::lyrics::read_lrc(&spec.input) {
-            plan.tags.push(("LYRICS".to_owned(), text));
-        }
-    }
-    let args = ffmpeg::build_args(&spec.input, &output, &preset, &cleanup, &probe.tags, &ignored, with_cover, probe.source, &plan);
+    let args = assemble_args(spec, &probe, &preset, &output, &mut plan);
 
     set_status(inner, spec.id, JobStatus::Running { percent: 0.0 });
     let mut child = match ffmpeg::command(&ffmpeg_path)
@@ -325,7 +355,7 @@ fn run_job(inner: &Inner, spec: &JobSpec, cancel: &AtomicBool, child_slot: &Mute
                 let line = line.trim().to_owned();
                 if !line.is_empty() {
                     tail.push(line);
-                    if tail.len() > 12 {
+                    if tail.len() > 40 {
                         tail.remove(0);
                     }
                 }
@@ -356,11 +386,24 @@ fn run_job(inner: &Inner, spec: &JobSpec, cancel: &AtomicBool, child_slot: &Mute
         Some(Ok(s)) if s.success() => {
             // ffmpeg joins a repeated field into one value; the tag library writes them back as
             // separate values. A failure here keeps ffmpeg's tags: the file is still good.
-            let _ = crate::tags::restore_repeated_fields(&ffmpeg_path, &spec.input, &output, &preset, &cleanup, &probe.tags, &ignored, probe.source, &plan.tags);
+            let _ = crate::tags::restore_repeated_fields(&ffmpeg_path, &spec.input, &output, &preset, &spec.cleanup.clone().normalized(), &probe.tags, &crate::riff::unmapped_info_keys(&spec.input, &probe.tags), probe.source, &plan.tags);
             JobStatus::Done { output }
         }
         _ => {
             let _ = std::fs::remove_file(&output);
+            let exit_text = match &exit {
+                Some(Ok(s)) => s.to_string(),
+                Some(Err(e)) => format!("could not wait for ffmpeg: {e}"),
+                None => "no process".to_owned(),
+            };
+            crate::log::error(
+                "ffmpeg",
+                &format!(
+                    "{exit_text}\ncommand: {}\nsource: {probe:?}\nwhat ffmpeg said:\n{}",
+                    crate::log::command_line(&ffmpeg_path, &args),
+                    tail.join("\n")
+                ),
+            );
             let reason = tail.last().cloned().unwrap_or_else(|| "ffmpeg stopped without a message".to_owned());
             JobStatus::Failed { reason }
         }
@@ -2382,7 +2425,7 @@ mod tests {
         let dir = scratch("fades");
         let src = tone(&ff, &dir, "tone.wav", 5);
         let out = dir.join("out");
-        let e = entry_of(vec![Item::with("fade-in", &[("length", json!(1500))]), Item::with("fade-out", &[("length", json!(1500))])]);
+        let e = entry_of(vec![Item::with("sound-fade", &[("fade_in", json!(1.5)), ("fade_out", json!(1.5))])]);
         let file = run_one(ff.clone(), effects_job(&src, &out, Format::Flac, e, TagCleanup::default()));
         let (start, middle, end) = (peak_of(&ff, &file, 0.0, 0.15), peak_of(&ff, &file, 2.0, 1.0), peak_of(&ff, &file, 4.85, 0.15));
         assert!(start < middle - 10.0, "start {start} dB, middle {middle} dB");

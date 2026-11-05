@@ -24,6 +24,41 @@ use std::{
     path::{Path, PathBuf},
 };
 
+/// The choices of ONE view's options panel. The batch view's are the flat fields of `Settings` (the file format of every earlier
+/// version); the work view has its own set, so changing one view never changes the other. (The work view's effects are its own list,
+/// not a choice: see `RunChoice::effects_inline`.)
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Panel {
+    /// False until it has been given its first values (copied from the batch view's, once, when an older settings file is read);
+    /// `Settings::repaired` does that.
+    pub initialised: bool,
+    pub preset_id: String,
+    pub cleanup_id: String,
+    pub destination_id: String,
+    pub overwrite: Overwrite,
+    pub parallel: u32,
+}
+
+impl Panel {
+    fn seeded(initialised: bool) -> Panel {
+        Panel {
+            initialised,
+            preset_id: Preset::defaults()[0].id.clone(),
+            cleanup_id: STANDARD_ID.to_owned(),
+            destination_id: SOURCE_ID.to_owned(),
+            overwrite: Overwrite::Skip,
+            parallel: max_parallel(),
+        }
+    }
+}
+
+impl Default for Panel {
+    fn default() -> Panel {
+        Panel::seeded(false)
+    }
+}
+
 /// The "(None)" choice of the tags and effects selectors: no stored entry, it keeps every tag / applies
 /// no effect. Like "(Original)" for the preset, it is offered by the window and never listed in Settings.
 pub const NONE_ID: &str = "none";
@@ -52,6 +87,8 @@ pub struct Settings {
     pub overwrite: Overwrite,
     /// Show an operating-system notice when a run of conversions ends.
     pub notify: bool,
+    /// The work view's own panel choices.
+    pub work: Panel,
 }
 
 /// The most conversions that can be asked for, and the default: the PHYSICAL cores. Encoding is
@@ -81,11 +118,52 @@ impl Default for Settings {
             parallel: max_parallel(),
             overwrite: Overwrite::Skip,
             notify: true,
+            work: Panel::seeded(true),
         }
     }
 }
 
 impl Settings {
+    /// The list of effects entries the shared effects editor edits. This app has one list: `sound` (the second list of an app that converts video)
+    /// is never asked for here.
+    pub fn effects_list(&self, _sound: bool) -> &Vec<EffectsEntry> {
+        &self.effects
+    }
+
+    pub fn effects_list_mut(&mut self, _sound: bool) -> &mut Vec<EffectsEntry> {
+        &mut self.effects
+    }
+
+    /// The id of the selected entry.
+    pub fn effects_choice(&self, _sound: bool) -> &str {
+        &self.effects_id
+    }
+
+    pub fn effects_choice_mut(&mut self, _sound: bool) -> &mut String {
+        &mut self.effects_id
+    }
+
+    /// A settings file from before 2026-11-01 holds a channel count (mono / stereo) on its presets; it is a sound effect now (the
+    /// catalogue's `channels`), so each preset that had one gets an entry of the effects list, named after it, and the selected preset's
+    /// is selected. The presets do not write the field back, so this happens once.
+    fn take_over_channels(&mut self, text: &str) {
+        let Ok(json) = serde_json::from_str::<serde_json::Value>(text) else { return };
+        for old in json.get("presets").and_then(|p| p.as_array()).into_iter().flatten() {
+            let way = match old.get("channels").and_then(|c| c.as_u64()) {
+                Some(1) => "mono",
+                Some(2) => "stereo",
+                _ => continue,
+            };
+            let name = old.get("name").and_then(|n| n.as_str()).unwrap_or_default();
+            let mut entry = EffectsEntry::new(name);
+            entry.items.push(crate::effects::Item::with("channels", &[("mode", serde_json::json!(way))]));
+            if old.get("id").and_then(|i| i.as_str()) == Some(self.preset_id.as_str()) && (self.effects_id == NONE_ID || self.effects_id == EFFECTS_STANDARD_ID) {
+                self.effects_id = entry.id.clone();
+            }
+            self.effects.push(entry);
+        }
+    }
+
     /// Repair what a hand-edited or older file can get wrong: never zero presets, a selection that
     /// points at something that exists, presets inside what their format accepts.
     pub fn repaired(mut self) -> Self {
@@ -122,6 +200,22 @@ impl Settings {
             self.effects_id = self.effects[0].id.clone();
         }
         self.parallel = self.parallel.clamp(1, max_parallel());
+        // The work view's panel: copied from the batch view's the first time (an older file has none), then its own.
+        if !self.work.initialised {
+            self.work = Panel { initialised: true, ..self.panel() };
+        }
+        let mut w = self.work.clone();
+        if w.preset_id != ORIGINAL_ID && !self.presets.iter().any(|p| p.id == w.preset_id) {
+            w.preset_id = self.presets[0].id.clone();
+        }
+        if w.cleanup_id != NONE_ID && !self.cleanups.iter().any(|c| c.id == w.cleanup_id) {
+            w.cleanup_id = self.cleanups[0].id.clone();
+        }
+        if w.destination_id != SOURCE_ID && !self.destinations.iter().any(|d| d.id == w.destination_id) {
+            w.destination_id = SOURCE_ID.to_owned();
+        }
+        w.parallel = w.parallel.clamp(1, max_parallel());
+        self.work = w;
         self
     }
 
@@ -178,14 +272,39 @@ impl Settings {
         self.destination_by(&self.destination_id)
     }
 
-    /// Everything a run is made of, as the panel shows it now.
-    pub fn choice(&self) -> RunChoice {
-        RunChoice {
+    /// The batch view's panel choices.
+    pub fn panel(&self) -> Panel {
+        Panel {
+            initialised: true,
             preset_id: self.preset_id.clone(),
             cleanup_id: self.cleanup_id.clone(),
-            effects_id: self.effects_id.clone(),
             destination_id: self.destination_id.clone(),
             overwrite: self.overwrite,
+            parallel: self.parallel,
+        }
+    }
+
+    /// The effects a file is converted with: the work view's own list when it has one, else the saved entry it names.
+    pub fn effects_of(&self, run: &RunChoice) -> EffectsEntry {
+        run.effects_inline.clone().unwrap_or_else(|| self.effects_by(&run.effects_id))
+    }
+
+    /// Everything a run is made of, as the panel shows it now.
+    pub fn choice(&self) -> RunChoice {
+        let mut run = self.choice_of(&self.panel());
+        run.effects_id = self.effects_id.clone();
+        run
+    }
+
+    /// Everything a run is made of, from the choices of the panel `p`; the effects are the caller's to put in.
+    pub fn choice_of(&self, p: &Panel) -> RunChoice {
+        RunChoice {
+            preset_id: p.preset_id.clone(),
+            cleanup_id: p.cleanup_id.clone(),
+            effects_id: NONE_ID.to_owned(),
+            effects_inline: None,
+            destination_id: p.destination_id.clone(),
+            overwrite: p.overwrite,
         }
     }
 }
@@ -197,11 +316,13 @@ pub struct RunChoice {
     pub preset_id: String,
     pub cleanup_id: String,
     pub effects_id: String,
+    /// The work view's own list of effects, when the file was applied from there: it is used instead of the saved entry `effects_id`.
+    pub effects_inline: Option<EffectsEntry>,
     pub destination_id: String,
     pub overwrite: Overwrite,
 }
 
-/// The settings file of the product called `product` (its display name, e.g. "Audio Converter").
+/// The settings file of the product called `product` (its display name, e.g. "FFmpeg Audio Studio").
 /// The folder every yaiol app keeps its one ffmpeg in: shared by the apps, the command line and the debug and
 /// release builds alike, in a subfolder per manifest schema (an older app never meets a pair it cannot read), and per user, so installing or replacing it needs no administrator rights.
 pub fn ffmpeg_dir() -> Option<PathBuf> {
@@ -211,6 +332,11 @@ pub fn ffmpeg_dir() -> Option<PathBuf> {
 fn path(product: &str) -> Option<PathBuf> {
     let folder = if cfg!(debug_assertions) { format!("{product} (Dev)") } else { product.to_owned() };
     Some(dirs::data_dir()?.join("yaiol").join(folder).join("settings.json"))
+}
+
+/// The folder the log file lives in, beside the settings of `product`.
+pub fn log_dir(product: &str) -> Option<PathBuf> {
+    Some(path(product)?.parent()?.join("logs"))
 }
 
 /// Where the settings of `product` are kept, for a message that has to name the file.
@@ -229,11 +355,22 @@ pub fn save(product: &str, settings: &Settings) {
 }
 
 pub fn load_from(path: &Path) -> Settings {
-    fs::read_to_string(path)
-        .ok()
-        .and_then(|text| serde_json::from_str::<Settings>(&text).ok())
-        .unwrap_or_default()
-        .repaired()
+    let read = match fs::read_to_string(path) {
+        Ok(text) => serde_json::from_str::<Settings>(&text).map_err(|e| format!("cannot read {}: {e}", path.display())),
+        // No file yet is the first launch, not a problem.
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Err(String::new()),
+        Err(e) => Err(format!("cannot read {}: {e}", path.display())),
+    };
+    if let Err(why) = &read {
+        if !why.is_empty() {
+            crate::log::error("settings", &format!("{why} - the defaults are used"));
+        }
+    }
+    let mut settings = read.unwrap_or_default();
+    if let Ok(text) = fs::read_to_string(path) {
+        settings.take_over_channels(&text);
+    }
+    settings.repaired()
 }
 
 pub fn save_to(path: &Path, settings: &Settings) {
@@ -263,6 +400,24 @@ mod tests {
         assert!(s.destination_by(&id).writes_to(dir));
         assert_eq!(s.destination_for_folder(dir), id, "the same folder picked again is the same entry");
         assert_eq!(s.destinations.len(), before + 1);
+    }
+
+    #[test]
+    fn the_channels_of_an_old_preset_become_an_effects_entry() {
+        let old = r#"{"presets":[{"id":"p1","name":"Mono MP3","channels":1},{"id":"p2","name":"Stereo","channels":2},{"id":"p3","name":"Keep"}],"preset_id":"p1"}"#;
+        let mut cfg: Settings = serde_json::from_str(old).unwrap();
+        let before = cfg.effects.len();
+        cfg.take_over_channels(old);
+        assert_eq!(cfg.effects.len(), before + 2);
+        let mono = cfg.effects.iter().find(|e| e.name == "Mono MP3").unwrap();
+        assert_eq!(mono.items[0].key, "channels");
+        assert_eq!(cfg.effects_id, mono.id);
+        // written back, a preset no longer holds the field, so a second read finds nothing to take over
+        let saved = serde_json::to_string(&cfg).unwrap();
+        let mut again: Settings = serde_json::from_str(&saved).unwrap();
+        let n = again.effects.len();
+        again.take_over_channels(&saved);
+        assert_eq!(again.effects.len(), n);
     }
 
     #[test]

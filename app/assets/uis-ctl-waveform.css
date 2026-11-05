@@ -1,0 +1,28 @@
+/* uis-ctl-waveform.css — the Waveform control (lib/uis-ctl-waveform.jsx)
+   ═══════════════════════════════════════════════════════════════════════════
+   An OPTIONAL control's skin, so it is its own file: the sync copies a catalog
+   CSS into an app only when that app uses it. It rides with the component by
+   STEM, and the jsx side-effect-imports it.
+
+   ⚠ Do not edit an app's copy — this file is distributed by sync-shared.js;
+   edit the canonical source and re-sync.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.uis-wvf { display: flex; flex-direction: column; gap: 6px; min-height: 0; flex: 1; }
+.uis-wvf-screen {
+  position: relative; flex: 1; min-height: 170px; display: flex; align-items: center; justify-content: center;
+  background: var(--uis-bg-row); border-radius: 6px; color: var(--uis-accent);
+}
+.uis-wvf-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.uis-wvf-dim { position: absolute; top: 0; bottom: 0; background: color-mix(in srgb, var(--uis-bg) 65%, transparent); }
+.uis-wvf-head { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--uis-danger); }
+.uis-wvf-times { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; font-variant-numeric: tabular-nums; }
+.uis-wvf-now { color: var(--uis-danger); }
+.uis-wvf-length { color: var(--uis-accent); }
+/* the timeline: a range whose track shows the kept part (--in / --out, set by the component) */
+.uis-wvf-timeline { -webkit-appearance: none; appearance: none; width: 100%; height: 18px; margin: 0; background: transparent; }
+.uis-wvf-timeline::-webkit-slider-runnable-track {
+  height: 8px; border-radius: 4px;
+  background: linear-gradient(to right, color-mix(in srgb, var(--uis-text-mute) 35%, transparent) var(--in, 0%), var(--uis-accent) var(--in, 0%), var(--uis-accent) var(--out, 0%), color-mix(in srgb, var(--uis-text-mute) 35%, transparent) var(--out, 0%));
+}
+.uis-wvf-timeline::-webkit-slider-thumb { -webkit-appearance: none; width: 4px; height: 18px; margin-top: -5px; border-radius: 2px; background: var(--uis-danger); }

@@ -66,7 +66,6 @@ pub struct Preset {
     pub compression_level: u32,
     /// `None` = keep the source's.
     pub sample_rate: Option<u32>,
-    pub channels: Option<u8>,
     /// WAV and FLAC only. `None` = the format's default (16).
     pub bit_depth: Option<u8>,
     /// Dither when the output is 16 bit: the lower bits are rounded with a little noise, which hides
@@ -89,7 +88,6 @@ impl Default for Preset {
             vbr_level: 7,
             compression_level: 5,
             sample_rate: None,
-            channels: None,
             bit_depth: None,
             dither: false,
             id3_version: Id3Version::V23,
@@ -318,11 +316,6 @@ impl Preset {
         if let Some(sr) = self.sample_rate {
             if !self.sample_rates().contains(&sr) {
                 self.sample_rate = None;
-            }
-        }
-        if let Some(c) = self.channels {
-            if c != 1 && c != 2 {
-                self.channels = None;
             }
         }
         match self.bit_depth {
@@ -612,10 +605,6 @@ impl Preset {
             push("-ar");
             push(&sr.to_string());
         }
-        if let Some(ch) = p.channels {
-            push("-ac");
-            push(&ch.to_string());
-        }
         a
     }
 
@@ -750,12 +739,11 @@ mod tests {
     }
 
     #[test]
-    fn rate_and_channels_are_appended_only_when_set() {
+    fn the_rate_is_appended_only_when_set() {
         let mut p = Preset::new("t", Format::Mp3);
         assert!(!args(&p).contains("-ar"));
         p.sample_rate = Some(44100);
-        p.channels = Some(1);
-        assert!(args(&p).ends_with("-ar 44100 -ac 1"));
+        assert!(args(&p).ends_with("-ar 44100"));
     }
 
     #[test]

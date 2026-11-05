@@ -6,34 +6,56 @@
 mod catalog;
 mod converter;
 mod effects_editor;
+mod effects_favourites;
 mod effects_form;
 mod ffmpeg_panel;
 mod i18n;
 mod icons;
 mod manager;
 mod notify;
+mod preview_session;
 mod runner;
 mod settings;
 mod site;
+mod work;
+mod work_command;
+mod work_effects;
+mod work_preview;
+mod work_tone;
+mod work_channels;
+mod work_compressor;
+mod work_level;
 
-use catalog::{AppTab, GithubIcon, NewsLoader, NewsSetting, SettingsView, news};
+use catalog::{UisAppTab, UisIcoGithub, UisNewsLoader, UisStgView, news};
 use converter::Converter;
+use runner::RunState;
+use work::Work;
 use dioxus::prelude::*;
 use dioxus_free_icons::{
     Icon,
-    icons::ld_icons::{LdSparkles, LdBell, LdCircleHelp, LdEraser, LdFolder, LdSettings, LdSlidersHorizontal},
+    icons::ld_icons::{LdFileText, LdSparkles, LdTerminal, LdBell, LdCircleHelp, LdEraser, LdFolder, LdLayers, LdSettings, LdVolume2, LdWrench},
 };
 use ffmpeg_panel::FfmpegSetting;
 use effects_editor::EffectsEditor;
+use effects_favourites::EffectsFavourites;
 use manager::{CleanupEditor, DestinationEditor, NotifyEditor, PresetEditor};
 
-const CSS: [&str; 5] = [
-    include_str!("../assets/ui-colors.css"),
-    include_str!("../assets/ui-app.css"),
-    include_str!("../assets/ui-listview.css"),
+const CSS: [&str; 6] = [
+    include_str!("../assets/uis-colors.css"),
+    include_str!("../assets/uis-app.css"),
+    include_str!("../assets/uis-listview.css"),
+    include_str!("../assets/uis-fld-labelled.css"),
     include_str!("../assets/app.css"),
     include_str!("../assets/effects_form.css"),
 ];
+
+/// The two ways to use the app: the work view (one file at a time, heard) or the batch view (many files, presets).
+/// Not saved: the app always opens on the work view.
+#[derive(Clone, Copy, PartialEq)]
+enum Mode {
+    Batch,
+    Work,
+}
 
 // ─── App identity - single source of truth: Cargo.toml (see build.rs) ───────────────────────────
 const APP_NAME: &str = env!("YAIOL_PRODUCT_NAME");
@@ -80,7 +102,28 @@ fn explicit_placement(window: dioxus::desktop::WindowBuilder) -> dioxus::desktop
     window
 }
 
+/// Opens the log file in the system's text viewer (its folder when there is no file yet).
+fn open_log() {
+    let Some(dir) = engine::settings::log_dir(APP_NAME) else { return };
+    let file = dir.join("ffmpeg-audio-studio.log");
+    let _ = open::that(if file.is_file() { file } else { dir });
+}
+
 fn main() {
+    // The log file comes first: everything after it, panics included, can be reported.
+    if let Some(dir) = engine::settings::log_dir(APP_NAME) {
+        engine::log::init(
+            &dir,
+            "ffmpeg-audio-studio",
+            &[
+                ("app", format!("{APP_NAME} {} ({})", env!("CARGO_PKG_VERSION"), app_version_build())),
+                ("kind", (if cfg!(debug_assertions) { "debug" } else { "release" }).to_owned()),
+                ("system", format!("{} {}", std::env::consts::OS, std::env::consts::ARCH)),
+                ("exe", std::env::current_exe().map(|p| p.display().to_string()).unwrap_or_default()),
+            ],
+        );
+        engine::log::install_panic_hook();
+    }
     let window = dioxus::desktop::WindowBuilder::new()
         .with_title(APP_NAME)
         // Below this the list and the panel no longer fit side by side. The minimum HEIGHT is not
@@ -108,15 +151,64 @@ fn main() {
         .launch(App);
 }
 
+/// The window may not be shorter than the layout needs: the header, the options panel down to its last row, and the status
+/// bar. Measured from the laid-out page of the view on screen - the panel's rows decide it, so a row added there raises the
+/// floor by itself. The first frames may not be laid out yet (fonts, styles), so it is asked again until the panel has a
+/// real height; if it never answers, a fixed floor stands, so the window is never left without one.
+pub(crate) async fn fit_window_height() {
+    let mut height = 0.0;
+    for _ in 0..40 {
+        tokio::time::sleep(std::time::Duration::from_millis(250)).await;
+        let mut ev = document::eval(
+            r#"
+            const q = (s) => document.querySelector('.view-slot:not(.view-hidden) ' + s);
+            const panel = q('.converter-panel'), head = q('.uis-barh-header');
+            const rule = q('.uis-barh-gradient'), foot = q('.uis-barh-footer');
+            if (!panel || !head || !foot || !panel.lastElementChild) { dioxus.send(0); }
+            else {
+                const end = panel.lastElementChild.getBoundingClientRect().bottom;
+                const pad = parseFloat(getComputedStyle(panel).paddingBottom) || 0;
+                const frame = head.offsetHeight + (rule ? rule.offsetHeight : 0) + foot.offsetHeight;
+                const right = (end - panel.getBoundingClientRect().top) + pad;
+                // the work view's left column: the preview's own minimum, the strip under it and the command
+                const wv = q('.wv'), strip = q('.work-strip') || q('.work-colour');
+                const left = wv && strip ? parseFloat(getComputedStyle(wv).minHeight) + strip.offsetHeight : 0;
+                dioxus.send(frame + Math.max(right, left));
+            }
+            "#,
+        );
+        if let Ok(h) = ev.recv::<f64>().await {
+            if h > 100.0 {
+                height = h.ceil();
+                break;
+            }
+        }
+    }
+    if height == 0.0 {
+        height = MIN_HEIGHT_FALLBACK;
+    }
+    // ⚠ CLAUDE: setting a minimum size makes the window system re-check the size, and on Windows that un-maximizes a
+    // maximized window and puts it back at its old size somewhere else (seen on every switch of view). A maximized
+    // window is already above any minimum, so it is left alone; the next switch of view measures again.
+    let window = dioxus::desktop::window();
+    if window.is_maximized() {
+        return;
+    }
+    window.set_min_inner_size(Some(dioxus::desktop::LogicalSize::new(MIN_WIDTH, height)));
+}
+
 #[component]
 fn App() -> Element {
     let mut settings = use_signal(settings::load);
+    // Runs and ffmpeg: one copy for every view, so what starts by itself starts once per launch.
+    let run = RunState::new(settings);
     let mut settings_open = use_signal(|| false);
     // Which Settings tab is showing (and the one it opens on): display, presets, destinations, about.
     let mut settings_tab = use_signal(String::new);
     // "Show news from yaiol": ONE switch per MACHINE, shared by every yaiol app (a small file in the yaiol
     // app-data folder), so it is read from there rather than from this app's own settings.
     let mut news_on = use_signal(|| news::read_state().enabled);
+    let mut mode = use_signal(|| Mode::Work);
 
     // <html> carries the language, its text direction and the theme: the catalog CSS keys off
     // `data-theme`, and a right-to-left language needs `dir` for the webview's own text engine.
@@ -139,43 +231,64 @@ fn App() -> Element {
     };
     engine::effects::set_language(&lang);
     let t = |key: &str| i18n::t(&lang, key);
+    let tip_batch = t("tipHdrBatch");
+    let tip_work = t("tipHdrWork");
     let tip_help = t("tipHdrHelp");
     let tip_settings = t("tipHdrSettings");
     let lbl_news = t("lblStgGeneralNews");
-    let tab_presets = t("tabStgPresets");
+    let lbl_log = t("lblStgLog");
+    let btn_log = t("btnOpenLog");
+    let tab_presets = t("tabStgAudio");
     let tab_destinations = t("tabStgDestinations");
     let tab_cleanups = t("tabStgCleanups");
     let tab_effects = t("tabStgEffects");
+    let tab_ffmpeg = t("tabStgFfmpeg");
     let tab_notifications = t("tabStgNotifications");
 
     let version = app_version_build();
     let help_url = site::site_url(APP_ID, &lang, "help");
     let github_url = format!("https://github.com/yaiol/{APP_ID}");
 
-    rsx! {
-        for css in CSS {
-            style { "{css}" }
+    // The header's first group, shared by both views: the two ways to use the app.
+    let header_start = rsx! {
+        div { class: "uis-barh-grp",
+            button {
+                class: if mode() == Mode::Work { "uis-btn ico active" } else { "uis-btn ico" },
+                title: "{tip_work}",
+                "aria-label": "{tip_work}",
+                "aria-pressed": "{mode() == Mode::Work}",
+                onclick: move |_| mode.set(Mode::Work),
+                Icon { width: 14, height: 14, icon: LdWrench }
+            }
+            button {
+                class: if mode() == Mode::Batch { "uis-btn ico active" } else { "uis-btn ico" },
+                title: "{tip_batch}",
+                "aria-label": "{tip_batch}",
+                "aria-pressed": "{mode() == Mode::Batch}",
+                onclick: move |_| mode.set(Mode::Batch),
+                Icon { width: 14, height: 14, icon: LdLayers }
+            }
         }
-        div { class: "app-root",
-            // A new version (first) and the yaiol news, in one dialog; what is shown is decided inside.
-            NewsLoader { app_id: APP_ID, app_version: APP_VERSION, lang: lang.clone() }
-            Converter {
-                settings,
-                app_name: APP_NAME,
-                app_version: version.clone(),
-                header_end: rsx! {
-                    div { class: "barh-grp",
+    };
+    // The bottom bar's edit buttons open Settings on the right tab.
+    let on_manage = move |tab: String| {
+        settings_tab.set(tab);
+        settings_open.set(true);
+    };
+    // The header's right-hand group, shared by both views: GitHub, help, settings.
+    let header_end = rsx! {
+                    div { class: "uis-barh-grp",
                         button {
-                            class: "btn icon",
+                            class: "uis-btn ico",
                             title: "GitHub",
                             "aria-label": "GitHub",
                             onclick: move |_| {
                                 let _ = open::that(&github_url);
                             },
-                            GithubIcon {}
+                            UisIcoGithub {}
                         }
                         button {
-                            class: "btn icon",
+                            class: "uis-btn ico",
                             title: "{tip_help}",
                             "aria-label": "{tip_help}",
                             onclick: move |_| {
@@ -184,7 +297,7 @@ fn App() -> Element {
                             Icon { width: 14, height: 14, icon: LdCircleHelp }
                         }
                         button {
-                            class: if settings_open() { "btn icon stg-toggle active" } else { "btn icon stg-toggle" },
+                            class: if settings_open() { "uis-btn ico uis-stg-toggle active" } else { "uis-btn ico uis-stg-toggle" },
                             title: "{tip_settings}",
                             "aria-label": "{tip_settings}",
                             "aria-pressed": "{settings_open()}",
@@ -195,14 +308,11 @@ fn App() -> Element {
                             Icon { width: 14, height: 14, icon: LdSettings }
                         }
                     }
-                },
-                // The bottom bar's edit buttons open Settings on the right tab.
-                on_manage: move |tab: String| {
-                    settings_tab.set(tab);
-                    settings_open.set(true);
-                },
+    };
+    // The Settings page, given to the view on screen only.
+    let page = rsx! {
                 if settings_open() {
-                    SettingsView {
+                    UisStgView {
                         app_name: APP_NAME,
                         app_version: version.clone(),
                         lang: lang.clone(),
@@ -211,38 +321,59 @@ fn App() -> Element {
                         on_set_theme: move |th| settings.write().theme = th,
                         on_close: move |_| settings_open.set(false),
                         general_extra: Some(rsx! {
-                            NewsSetting {
-                                enabled: news_on(),
-                                label: lbl_news.clone(),
-                                on_change: move |on: bool| {
-                                    news::set_enabled(on);
-                                    news_on.set(on);
-                                },
+                            div { class: "uis-fld-labelled divider",
+                                label { class: "uis-chk-lbl",
+                                    input {
+                                        r#type: "checkbox",
+                                        class: "uis-chk-box",
+                                        checked: news_on(),
+                                        onchange: move |e| {
+                                            news::set_enabled(e.checked());
+                                            news_on.set(e.checked());
+                                        },
+                                    }
+                                    "{lbl_news}"
+                                }
                             }
-                            FfmpegSetting { lang: lang.clone() }
+                            div { class: "uis-fld-labelled divider",
+                                label { class: "uis-fld-labelled-label", "{lbl_log}" }
+                                div {
+                                    button {
+                                        class: "uis-btn",
+                                        onclick: move |_| open_log(),
+                                        Icon { width: 14, height: 14, icon: LdFileText }
+                                        " {btn_log}"
+                                    }
+                                }
+                            }
                         }),
                         app_tabs: vec![
-                            AppTab {
+                            UisAppTab {
+                                key: manager::FFMPEG.to_owned(),
+                                label: tab_ffmpeg.clone(),
+                                icon: rsx! { Icon { width: 14, height: 14, icon: LdTerminal } },
+                            },
+                            UisAppTab {
                                 key: manager::PRESETS.to_owned(),
                                 label: tab_presets.clone(),
-                                icon: rsx! { Icon { width: 14, height: 14, icon: LdSlidersHorizontal } },
+                                icon: rsx! { Icon { width: 14, height: 14, icon: LdVolume2 } },
                             },
-                            AppTab {
+                            UisAppTab {
                                 key: manager::CLEANUPS.to_owned(),
                                 label: tab_cleanups.clone(),
                                 icon: rsx! { Icon { width: 14, height: 14, icon: LdEraser } },
                             },
-                            AppTab {
+                            UisAppTab {
                                 key: manager::EFFECTS.to_owned(),
                                 label: tab_effects.clone(),
                                 icon: rsx! { Icon { width: 14, height: 14, icon: LdSparkles } },
                             },
-                            AppTab {
+                            UisAppTab {
                                 key: manager::DESTINATIONS.to_owned(),
                                 label: tab_destinations.clone(),
                                 icon: rsx! { Icon { width: 14, height: 14, icon: LdFolder } },
                             },
-                            AppTab {
+                            UisAppTab {
                                 key: manager::NOTIFICATIONS.to_owned(),
                                 label: tab_notifications.clone(),
                                 icon: rsx! { Icon { width: 14, height: 14, icon: LdBell } },
@@ -259,11 +390,54 @@ fn App() -> Element {
                                 CleanupEditor { settings }
                             } else if settings_tab() == manager::EFFECTS {
                                 EffectsEditor { settings }
+                            } else if settings_tab() == manager::FFMPEG {
+                                div { class: "manager-form manager-wide",
+                                    FfmpegSetting { lang: lang.clone() }
+                                    EffectsFavourites { lang: lang.clone() }
+                                }
                             } else if settings_tab() == manager::NOTIFICATIONS {
                                 NotifyEditor { settings }
                             }
                         }),
                     }
+                }
+    };
+    let no_page = rsx! {};
+
+    rsx! {
+        for css in CSS {
+            style { "{css}" }
+        }
+        div { class: "uis-app-root",
+            // A new version (first) and the yaiol news, in one dialog; what is shown is decided inside.
+            UisNewsLoader { app_id: APP_ID, app_version: APP_VERSION, lang: lang.clone() }
+            // ⚠ CLAUDE: BOTH views stay mounted and the other one is only hidden, so nothing either of them holds (the
+            // list, the selection, the preview's place and volume) is ever dropped. The Settings page is given to the
+            // view on screen only.
+            div { class: if mode() == Mode::Work { "view-slot" } else { "view-slot view-hidden" },
+                Work {
+                    run,
+                    active: mode() == Mode::Work,
+                    settings,
+                    app_name: APP_NAME,
+                    app_version: version.clone(),
+                    header_start: header_start.clone(),
+                    header_end: header_end.clone(),
+                    on_manage,
+                    {if mode() == Mode::Work { page.clone() } else { no_page.clone() }}
+                }
+            }
+            div { class: if mode() == Mode::Work { "view-slot view-hidden" } else { "view-slot" },
+                Converter {
+                    run,
+                    active: mode() != Mode::Work,
+                    settings,
+                    app_name: APP_NAME,
+                    app_version: version.clone(),
+                    header_start: header_start.clone(),
+                    header_end: header_end.clone(),
+                    on_manage,
+                    {if mode() == Mode::Work { no_page.clone() } else { page.clone() }}
                 }
             }
         }

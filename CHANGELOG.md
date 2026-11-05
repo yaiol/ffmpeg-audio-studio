@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.0 — 2026-11-06
+
+- The app is renamed FFmpeg Audio Studio (it was Audio Converter); the installer, the Start menu entry and the settings folder carry the new name
+- A work view opens first: one file at a time, with its waveform above a short file list, real playback with the effects applied, volume and mute, step buttons, and a cut set with the `[` and `]` marks; a button switches to the batch view, which keeps converting many files
+- A fade in and a fade out are set by dragging a handle on the waveform or typing the seconds
+- Drawers for the sound's channels, equaliser, compressor and level replace long forms; the equaliser and the compressor are drawn as graphs
+- The work view lists the standard sound effects as rows with a switch, and the rest are added from a menu; the effects list is renamed Audio Effects
+- Channels are now an effect (swap left and right, one side on both, mix to mono, mix down to stereo) instead of a preset setting; presets that had a channel choice are converted automatically
+- A panel under the file list shows the exact ffmpeg command for the selected file, with a Copy button
+- Settings > ffmpeg lets you choose which effects are always offered
+- Number fields can be dragged with the mouse, and the work view's controls are compact
+
 ## 1.5.0 — 2026-10-27
 
 - ffmpeg is no longer shipped with the app or taken from the machine's PATH: the app downloads the build yaiol approves into the folder shared by all yaiol apps and checks it first; Settings has a new ffmpeg section with the installed version, the latest version and Update, and a first run without ffmpeg offers Download ffmpeg with a progress readout

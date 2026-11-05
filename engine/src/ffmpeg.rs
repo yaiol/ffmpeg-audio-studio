@@ -66,6 +66,12 @@ pub struct SourceKind {
     pub id3: bool,
 }
 
+/// The first line of ffmpeg's `-version` (its version and build), for the log; empty when the program does not answer.
+pub fn version_line(ffmpeg: &Path) -> String {
+    let Ok(out) = command(ffmpeg).arg("-version").stdin(Stdio::null()).output() else { return String::new() };
+    String::from_utf8_lossy(&out.stdout).lines().next().unwrap_or("").trim().to_owned()
+}
+
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Probe {
     pub duration_us: u64,

@@ -11,7 +11,7 @@ set -euo pipefail
 here="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$here"
 
-cargo build --release -p audio-converter-cli
+cargo build --release -p ffmpeg-audio-studio-cli
 
 mkdir -p app/resources
 copied=0

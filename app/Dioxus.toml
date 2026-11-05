@@ -1,14 +1,14 @@
 [application]
-name = "Audio Converter"
+name = "FFmpeg Audio Studio"
 # The installer is generated straight into main/release (relative to this crate), not left nine
 # folders deep under target/.
 out_dir = "../release"
 
 [bundle]
-identifier = "com.yaiol.audio-converter.app"
+identifier = "com.yaiol.ffmpeg-audio-studio.app"
 publisher = "yaiol"
 icon = ["assets/app.png", "assets/app.ico", "assets/app.icns"]
-short_description = "Audio converter"
+short_description = "FFmpeg Audio Studio"
 # The command line (yac) is built by scripts/build-cli.sh and lands here, beside the window. dx skips a listed
 # resource that is not there (with a warning). ffmpeg is NOT a resource: the app installs it itself, into the
 # folder every yaiol app shares.

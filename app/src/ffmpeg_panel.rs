@@ -1,4 +1,4 @@
-//! Everything the window shows about ffmpeg: the section of Settings > General (which version is installed, and
+//! Everything the window shows about ffmpeg: the section of Settings > ffmpeg (which version is installed, and
 //! the one button that brings it up to date), and the popup that appears while an install or an update runs, or
 //! when one fails. There is nothing to choose: the app runs the one build yaiol approved, from the folder every
 //! yaiol app shares, and installs it by itself when it is missing or when a newer one is approved.
@@ -67,15 +67,15 @@ pub fn FfmpegPopup(lang: String, popup: Popup, on_close: EventHandler<()>) -> El
     };
     let title = if update { t("ttlMainFfmpegUpdating") } else { t("ttlMainFfmpegInstalling") };
     rsx! {
-        div { class: "dl-backdrop",
-            div { class: "dlp",
-                Icon { icon: LdDownload, class: "dlp-icon" }
-                div { class: "dlp-title", "{title}" }
-                div { class: "dlp-sub", "{text}" }
+        div { class: "uis-dl-backdrop",
+            div { class: "uis-dlp",
+                Icon { icon: LdDownload, class: "uis-dlp-icon" }
+                div { class: "uis-dlp-title", "{title}" }
+                div { class: "uis-dlp-sub", "{text}" }
                 if let Some(action) = action {
-                    div { class: "dlp-foot",
-                        button { class: "btn", onclick: move |_| install(), "{action}" }
-                        button { class: "btn", onclick: move |_| on_close.call(()), "{close}" }
+                    div { class: "uis-dlp-foot",
+                        button { class: "uis-btn", onclick: move |_| install(), "{action}" }
+                        button { class: "uis-btn", onclick: move |_| on_close.call(()), "{close}" }
                     }
                 }
             }
@@ -88,8 +88,12 @@ pub fn FfmpegSetting(lang: String) -> Element {
     let mut installed = use_signal(installed_version);
     let mut latest = use_signal(|| LATEST.snapshot());
     let mut dl = use_signal(|| DOWNLOAD.snapshot());
-    // Asked again each time Settings opens (this section mounts with the page).
-    use_hook(|| LATEST.check());
+    // The answer comes from the check at launch; it is asked again only when that one gave none (offline then).
+    use_hook(|| {
+        if !matches!(LATEST.snapshot(), LatestState::Known(_)) {
+            LATEST.check();
+        }
+    });
     use_future(move || async move {
         loop {
             tokio::time::sleep(Duration::from_millis(300)).await;
@@ -137,8 +141,8 @@ pub fn FfmpegSetting(lang: String) -> Element {
     let offer = matches!(latest, LatestState::Known(_)) && !up_to_date;
 
     rsx! {
-        div { class: "dlg-field divider",
-            label { class: "dlg-field-label", "{label}" }
+        div { class: "uis-fld-labelled divider",
+            label { class: "uis-fld-labelled-label", "{label}" }
             span {
                 "{installed_line}"
                 if up_to_date {
@@ -152,7 +156,7 @@ pub fn FfmpegSetting(lang: String) -> Element {
             if offer {
                 div {
                     button {
-                        class: "btn",
+                        class: "uis-btn",
                         disabled: busy,
                         onclick: move |_| install(),
                         if have.is_some() {

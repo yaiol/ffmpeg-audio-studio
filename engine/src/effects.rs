@@ -1,12 +1,12 @@
 //! Effects: an audio chain applied while converting (see PLAN-effects.md).
 //!
 //! An [`EffectsEntry`] is a named setting like a tag-cleaning entry, chosen apart from the preset so one preset can be used with several
-//! chains. It is a LIST of effects in the order the user put them, the same list as the Video Converter's: each item is one effect (a
+//! chains. It is a LIST of effects in the order the user put them, the same list as the FFmpeg Video Studio's: each item is one effect (a
 //! hand-written effect's id, or `try:` and an ffmpeg filter's name) and the values of its controls. Being in the list means it is on;
 //! removing it turns it off.
 //!
 //! The effects themselves are the catalogue installed with ffmpeg (`effects.json` in the pair's folder, see `download`; a form per effect,
-//! read by `ffmpeg_effects`, the module shared with the Video Converter). No copy of it is embedded: without it no effect can be built.
+//! read by `ffmpeg_effects`, the module shared with the FFmpeg Video Studio). No copy of it is embedded: without it no effect can be built.
 //! Most effects are plain filters and are written in the order listed. A few need the file MEASURED first (where the sound starts and stops,
 //! its loudness): they are the *measured* effects. The catalogue says which they are: an effect with a `measure` block names an operation
 //! ([`Op`], the fixed list of what this app can do) and which of its controls feeds each input of it; no effect is named in this file. The
@@ -18,9 +18,10 @@
 //! analysis into exact filter arguments, the length the output will have, and the tags to write. Nothing here runs ffmpeg: the queue does,
 //! and hands the text over.
 
-use crate::ffmpeg_effects::{self as fx, Catalog, Ctx, Values, V};
+use crate::ffmpeg_effects::{self as fx, Catalog, Values, V};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+pub use crate::measured::*;
 use std::{
     collections::BTreeMap,
     path::Path,
@@ -30,72 +31,12 @@ use std::{
 /// What the app converts, for the catalogue's menu: the effects that work on it.
 pub const WORKS: &str = "audio";
 
+/// This app's id, as the catalogue names it (`hiddenIn`).
+pub const APP: &str = "ffmpeg-audio-studio";
+
 /// The id of the entry a fresh install starts with: an ordinary entry with no effect in it.
 pub const STANDARD_ID: &str = "default-effects";
 
-/// What this app can do for a measured effect: the values `measure.op` of the catalogue can take. The effects that use them, their
-/// names, their controls and the limits of these are all the catalogue's.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum Op {
-    /// Cut the silence at the start and / or the end of the song.
-    CutSilence,
-    /// Keep the part between two times.
-    CutRange,
-    /// Keep at most some seconds.
-    CutLength,
-    /// Set the volume to a loudness.
-    GainLoudness,
-    /// Set the volume so the highest sample is at a level.
-    GainPeak,
-    /// Set the volume to the ReplayGain figure.
-    GainReplayGain,
-    /// A fixed gain.
-    GainFixed,
-    /// Cut the song where it stops and leave some silence after it.
-    PadSilence,
-    /// Write the ReplayGain tags.
-    TagsReplayGain,
-}
-
-impl Op {
-    fn named(name: &str) -> Option<Op> {
-        Some(match name {
-            "cut-silence" => Op::CutSilence,
-            "cut-range" => Op::CutRange,
-            "cut-length" => Op::CutLength,
-            "gain-loudness" => Op::GainLoudness,
-            "gain-peak" => Op::GainPeak,
-            "gain-replaygain" => Op::GainReplayGain,
-            "gain-fixed" => Op::GainFixed,
-            "pad-silence" => Op::PadSilence,
-            "tags-replaygain" => Op::TagsReplayGain,
-            _ => return None,
-        })
-    }
-
-    fn is_gain(self) -> bool {
-        matches!(self, Op::GainLoudness | Op::GainPeak | Op::GainReplayGain | Op::GainFixed)
-    }
-}
-
-/// The inputs of a measured effect: the value of the control the catalogue names for each, kept inside that control's own limits.
-struct Inputs {
-    values: Values,
-    roles: BTreeMap<String, String>,
-    bounds: BTreeMap<String, (Option<f64>, Option<f64>)>,
-}
-
-impl Inputs {
-    fn number(&self, role: &str) -> f64 {
-        let Some(id) = self.roles.get(role) else { return 0.0 };
-        let (min, max) = self.bounds.get(id).copied().unwrap_or((None, None));
-        self.values.get(id).map_or(0.0, V::to_number).clamp(min.unwrap_or(f64::MIN), max.unwrap_or(f64::MAX))
-    }
-
-    fn switch(&self, role: &str) -> bool {
-        self.roles.get(role).and_then(|id| self.values.get(id)).is_some_and(V::truthy)
-    }
-}
 
 /// The catalogue as read, with the words of every language; `CATALOG` is the copy in the language of the window.
 static BASE: RwLock<Option<Arc<Catalog>>> = RwLock::new(None);
@@ -135,9 +76,16 @@ pub fn set_catalog_text(text: &str) -> Result<(), String> {
     Ok(())
 }
 
+/// The favourites live beside the catalogue of the installed pair.
+fn load_favourites(dir: Option<&Path>) {
+    FAVOURITES.load(dir.and_then(crate::download::catalogue_path).as_deref().and_then(Path::parent));
+}
+
 /// Load the catalogue of the pair installed in `dir`, or none when there is no pair there (or it cannot be read). Called at launch and
 /// after every install.
+#[cfg(not(debug_assertions))]
 pub fn load_installed(dir: Option<&Path>) -> Result<(), String> {
+    load_favourites(dir);
     let loaded = dir
         .and_then(crate::download::catalogue_path)
         .map(|path| std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display())).and_then(|text| set_catalog_text(&text)));
@@ -155,6 +103,14 @@ pub fn load_installed(dir: Option<&Path>) -> Result<(), String> {
             Ok(())
         }
     }
+}
+
+/// A debug build (the "(Dev)" app) works on the catalogue of the source tree - the one the shared folder makes, which the tests also read - and not on the
+/// one installed from the site, so an effect being written shows at once and nothing is published to try it. Never part of a release build.
+#[cfg(debug_assertions)]
+pub fn load_installed(dir: Option<&Path>) -> Result<(), String> {
+    load_favourites(dir);
+    set_catalog_text(include_str!("../testdata/effects.json"))
 }
 
 /// The tests' catalogue: a copy of the one the shared folder makes (never part of a build).
@@ -185,6 +141,11 @@ impl Item {
     /// The effect this item is, when the catalogue has it.
     pub fn effect(&self) -> Option<fx::Effect> {
         catalog()?.form(&self.key)
+    }
+
+    /// Whether one of the effect's steps, on the sound or on the picture, is the ffmpeg filter `name`.
+    pub fn uses_filter(&self, name: &str) -> bool {
+        self.effect().is_some_and(|e| e.steps.iter().chain(e.audio.iter()).flatten().any(|st| st.filter.as_deref() == Some(name)))
     }
 
     /// The values of every control: the defaults, then what the user set.
@@ -221,158 +182,86 @@ impl Item {
     }
 }
 
-/// Trim silence at the ends: the start, the end, or both. Never the middle of the song.
-#[derive(Clone, Debug, PartialEq)]
-pub struct TrimSilence {
-    pub start: bool,
-    pub end: bool,
-    /// Below this level (dBFS) the sound counts as silence.
-    pub threshold_db: f64,
-    /// A little of the silence kept at each cut, so a quiet attack or decay is not clipped.
-    pub margin_ms: u32,
+
+/// The order of the STANDARD effects (the catalogue's `standard` level), which the work view shows as rows and runs in: what cuts the
+/// file first, then the processing, the volume, the fades, and last the silence and the tags. Fixed on purpose: the user has no order to
+/// manage there (the volume effects are modes of one thing, so they sit together). A standard effect not named here comes after these, by
+/// title.
+pub const STANDARD_ORDER: &[&str] = crate::measured::SOUND_STANDARD_ORDER;
+
+/// The catalogue's effect that keeps a range: the one the work view's cut marks write into.
+pub const KEEP_RANGE: &str = "keep-range";
+
+/// What the user chose to list in the work view, kept beside the catalogue (`favourites.json`).
+static FAVOURITES: fx::favourites::Choice = fx::favourites::Choice::new("ffmpeg-audio-studio");
+
+/// The effects the user has chosen to list (`None`: he has not chosen, and the catalogue's standard effects are listed).
+pub fn favourites() -> Option<Vec<String>> {
+    FAVOURITES.get()
 }
 
-/// Keep a part of the song: from `from_s` to `to_s` (0 = to the end), counted on what is left after the effects before it.
-#[derive(Clone, Debug, PartialEq)]
-pub struct CutRange {
-    pub from_s: f64,
-    pub to_s: f64,
+/// Choose the effects to list in the work view (`None` takes the choice back).
+pub fn set_favourites(keys: Option<Vec<String>>) -> Result<(), String> {
+    FAVOURITES.set(keys)
 }
 
-/// Keep at most this many seconds.
-#[derive(Clone, Debug, PartialEq)]
-pub struct LimitDuration {
-    pub seconds: f64,
+/// An effect the app itself is wired to, so it is always listed: one drawn by a widget, or a hand-written effect the work view reads by key.
+pub fn is_locked(entry: &fx::Entry) -> bool {
+    entry.widget.is_some() || (STANDARD_ORDER.contains(&entry.key.as_str()) && !entry.key.starts_with("try:"))
 }
 
-/// How the volume is set.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum VolumeMode {
-    /// Bring the integrated loudness to a target (LUFS).
-    Loudness,
-    /// Bring the highest sample to a target level (dBFS).
-    Peak,
-    /// Apply the ReplayGain track (or album) gain to the audio.
-    ReplayGain,
-    /// A fixed gain in dB.
-    Gain,
-}
-
-/// The volume of the track: one of four ways. A limiter follows every gain that could clip (all but the peak mode, whose result cannot
-/// exceed its target).
-#[derive(Clone, Debug, PartialEq)]
-pub struct Volume {
-    pub mode: VolumeMode,
-    pub target_lufs: f64,
-    pub target_peak_db: f64,
-    /// The level (dBFS) the limiter keeps the peaks under.
-    pub ceiling_db: f64,
-    pub gain_db: f64,
-    /// ReplayGain mode: use the album's gain (the files of one folder and one album in the run).
-    pub album: bool,
-}
-
-impl Default for Volume {
-    fn default() -> Self {
-        Volume { mode: VolumeMode::Loudness, target_lufs: -16.0, target_peak_db: -1.0, ceiling_db: -1.0, gain_db: 0.0, album: false }
+/// Is this effect listed in the work view, given what the user chose (`None`: nothing): a locked one by the catalogue's level, the others by
+/// the choice, or by the level when there is none.
+fn is_listed(entry: &fx::Entry, chosen: Option<&[String]>) -> bool {
+    if is_locked(entry) {
+        return entry.level == "standard";
     }
+    chosen.map_or(entry.level == "standard", |keys| keys.contains(&entry.key))
 }
 
-/// Silence at the end: the song is cut where it stops and exactly `seconds` of silence follow.
-#[derive(Clone, Debug, PartialEq)]
-pub struct SilenceEnd {
-    /// How long the silence after the song is, whatever the track's own tail was.
-    pub seconds: f64,
-    /// Below this level (dBFS) the sound counts as silence.
-    pub threshold_db: f64,
-    /// A little of the original tail kept, so a quiet decay is not clipped (counted in `seconds`).
-    pub margin_ms: u32,
+/// Is this effect listed in the work view now.
+pub fn is_standard(entry: &fx::Entry) -> bool {
+    is_listed(entry, FAVOURITES.get().as_deref())
 }
 
-/// Write the ReplayGain tags (the audio is not touched); with `album`, the album's too.
+/// The keys of the standard effects this catalogue offers, in the fixed order of the work view.
+pub fn standard_keys(cat: &Catalog, system: &str) -> Vec<String> {
+    standard_keys_by(cat, system, FAVOURITES.get().as_deref())
+}
+
+fn standard_keys_by(cat: &Catalog, system: &str, chosen: Option<&[String]>) -> Vec<String> {
+    let mut entries: Vec<_> = cat.picker(system, WORKS).into_iter().filter(|e| is_listed(e, chosen)).collect();
+    let rank = |key: &str| STANDARD_ORDER.iter().position(|k| *k == key).unwrap_or(STANDARD_ORDER.len());
+    entries.sort_by(|a, b| rank(&a.key).cmp(&rank(&b.key)).then_with(|| a.title.to_lowercase().cmp(&b.title.to_lowercase())));
+    entries.into_iter().map(|e| e.key).collect()
+}
+
+/// A standard effect the catalogue draws with a widget of its own: the work view shows it as a drawer (a graph), never as a row, and it takes
+/// no place in the "Add an effect" menu there.
 #[derive(Clone, Debug, PartialEq)]
-pub struct ReplayGainTags {
-    pub album: bool,
+pub struct WidgetSpec {
+    pub key: String,
+    pub kind: String,
+    /// Which control of the effect feeds each input of the widget.
+    pub controls: BTreeMap<String, String>,
+}
+
+/// The widget effects this catalogue offers, in the fixed order of the standard effects.
+pub fn widgets(cat: &Catalog, system: &str) -> Vec<WidgetSpec> {
+    standard_keys(cat, system)
+        .into_iter()
+        .filter_map(|key| {
+            let w = cat.effects.get(&key)?.widget.clone()?;
+            Some(WidgetSpec { key, kind: w.kind, controls: w.controls })
+        })
+        .collect()
 }
 
 impl Item {
-    /// The operation the catalogue gives this effect, when it is a measured effect this app can do.
-    fn op(&self) -> Option<Op> {
-        Op::named(&catalog()?.effects.get(&self.key)?.measure.as_ref()?.op)
-    }
-
-    /// Does the catalogue say the app does this effect itself, from what it measures? (An operation this app lacks still counts: the job
-    /// says so, `try_chain`.)
-    fn is_measured(&self) -> bool {
-        catalog().is_some_and(|c| c.effects.get(&self.key).is_some_and(|e| e.measure.is_some()))
-    }
-
-    fn is_volume(&self) -> bool {
-        self.op().is_some_and(Op::is_gain)
-    }
-
-    /// The operation and its inputs, for the measured effect this item is.
-    fn measured(&self) -> Option<(Op, Inputs)> {
-        let cat = catalog()?;
-        let effect = cat.effects.get(&self.key)?;
-        let measure = effect.measure.as_ref()?;
-        let bounds = fx::resolve_controls(effect, &cat.filters).ok()?.into_iter().map(|c| (c.id, (c.min, c.max))).collect();
-        Some((Op::named(&measure.op)?, Inputs { values: self.all_values(), roles: measure.controls.clone(), bounds }))
-    }
-
-    /// How many times faster the effect plays the clip, when it is one that changes the speed (the catalogue names the option: `speed`
-    /// of the filter).
-    fn speed(&self) -> Option<f64> {
-        let cat = catalog()?;
-        let option = cat.filters.get(self.key.strip_prefix("try:")?)?.speed.as_ref()?;
-        self.all_values().get(option).map(V::to_number)
-    }
-
-    fn as_trim_silence(&self) -> Option<TrimSilence> {
-        let (op, r) = self.measured()?;
-        (op == Op::CutSilence).then(|| TrimSilence { start: r.switch("start"), end: r.switch("end"), threshold_db: r.number("threshold"), margin_ms: r.number("margin") as u32 })
-    }
-
-    fn as_cut_range(&self) -> Option<CutRange> {
-        let (op, r) = self.measured()?;
-        (op == Op::CutRange).then(|| CutRange { from_s: r.number("from"), to_s: r.number("to") })
-    }
-
-    fn as_limit_duration(&self) -> Option<LimitDuration> {
-        let (op, r) = self.measured()?;
-        (op == Op::CutLength).then(|| LimitDuration { seconds: r.number("seconds") })
-    }
-
-    fn as_volume(&self) -> Option<Volume> {
-        let (op, r) = self.measured()?;
-        let mode = match op {
-            Op::GainLoudness => VolumeMode::Loudness,
-            Op::GainPeak => VolumeMode::Peak,
-            Op::GainReplayGain => VolumeMode::ReplayGain,
-            Op::GainFixed => VolumeMode::Gain,
-            _ => return None,
-        };
-        let mut v = Volume { mode, ..Volume::default() };
-        match mode {
-            VolumeMode::Loudness => v.target_lufs = r.number("target"),
-            VolumeMode::Peak => v.target_peak_db = r.number("target"),
-            VolumeMode::ReplayGain => v.album = r.switch("album"),
-            VolumeMode::Gain => v.gain_db = r.number("gain"),
-        }
-        if mode != VolumeMode::Peak {
-            v.ceiling_db = r.number("ceiling");
-        }
-        Some(v)
-    }
-
-    fn as_silence_end(&self) -> Option<SilenceEnd> {
-        let (op, r) = self.measured()?;
-        (op == Op::PadSilence).then(|| SilenceEnd { seconds: r.number("seconds"), threshold_db: r.number("threshold"), margin_ms: r.number("margin") as u32 })
-    }
-
-    fn as_replaygain(&self) -> Option<ReplayGainTags> {
-        let (op, r) = self.measured()?;
-        (op == Op::TagsReplayGain).then(|| ReplayGainTags { album: r.switch("album") })
+    /// Every control is at its default: the item does nothing, and a widget's item is left out of the list in that case.
+    pub fn is_default(&self) -> bool {
+        let (Some(cat), Some(effect)) = (catalog(), self.effect()) else { return false };
+        self.all_values() == fx::defaults(&effect, &cat.filters).unwrap_or_default()
     }
 }
 
@@ -393,6 +282,91 @@ impl Default for EffectsEntry {
 }
 
 impl EffectsEntry {
+    /// The item of effect `key` takes `values` (put in the list when it is not there); with none, or with every value at its default, the
+    /// effect leaves the list. Used by a widget, which is always there and only shows in the list once it changes something.
+    pub fn set_widget(&mut self, key: &str, values: Option<&Values>) {
+        let mut item = self.items.iter().find(|i| i.key == key).cloned().unwrap_or_else(|| Item::new(key));
+        if let Some(v) = values {
+            item.set_values(v);
+        }
+        self.items.retain(|i| i.key != key);
+        if values.is_some() && !item.is_default() {
+            self.items.push(item);
+        }
+    }
+
+    /// The item of effect `key` takes `values` and stays in the list even when they are its defaults (an effect whose defaults still DO
+    /// something: swap the channels, bring the loudness to -16); none takes it out. Used by a drawer that chooses an action.
+    pub fn set_item(&mut self, key: &str, values: Option<&Values>) {
+        let mut item = self.items.iter().find(|i| i.key == key).cloned().unwrap_or_else(|| Item::new(key));
+        self.items.retain(|i| i.key != key);
+        if let Some(v) = values {
+            item.set_values(v);
+            self.items.push(item);
+        }
+    }
+
+    /// The same list with the standard effects first, each at its fixed place, and every other effect after them in the order it was
+    /// added. A standard effect is listed once. The work view's list keeps this shape.
+    pub fn arranged(mut self, standard: &[String]) -> EffectsEntry {
+        let mut rows: Vec<Item> = Vec::new();
+        for key in standard {
+            if let Some(at) = self.items.iter().position(|i| &i.key == key) {
+                rows.push(self.items.remove(at));
+            }
+        }
+        // a second copy of a standard effect is dropped; the rest keep their order
+        self.items.retain(|i| !standard.contains(&i.key));
+        rows.extend(self.items);
+        self.items = rows;
+        self
+    }
+
+    /// The same list without the effects that decide how much of the file is kept after the silence is trimmed (the range, the limit, the
+    /// silence at the end): what is left is where a time written in the range's boxes counts from.
+    pub fn without_cuts(&self) -> EffectsEntry {
+        let mut e = self.clone();
+        e.items.retain(|i| !matches!(i.op(), Some(Op::CutRange | Op::CutLength | Op::PadSilence)));
+        e
+    }
+
+    /// Mark the start and / or the end of the range kept, in seconds counted on what the effects above the range leave: the range
+    /// effect is added when the list has none. A start that is not before the end clears the end (0 = the end), and the other way
+    /// round, so the range is never one the conversion would turn into nothing.
+    pub fn mark_range(&mut self, start: Option<f64>, end: Option<f64>) {
+        let at = match self.items.iter().position(|i| i.key == KEEP_RANGE) {
+            Some(at) => at,
+            None => {
+                self.items.push(Item::new(KEEP_RANGE));
+                self.items.len() - 1
+            }
+        };
+        let item = &mut self.items[at];
+        let values = item.all_values();
+        let number = |id: &str| values.get(id).map_or(0.0, V::to_number);
+        let (mut from, mut to) = (number("from"), number("to"));
+        if let Some(s) = start {
+            from = s.max(0.0);
+            if to > 0.0 && to <= from {
+                to = 0.0;
+            }
+        }
+        if let Some(e) = end {
+            to = e.max(0.0);
+            if to > 0.0 && from >= to {
+                from = 0.0;
+            }
+        }
+        let round = |x: f64| Value::from((x * 1000.0).round() / 1000.0);
+        item.values.insert("from".to_owned(), round(from));
+        item.values.insert("to".to_owned(), round(to));
+    }
+
+    /// Keep the whole file again: the range effect leaves the list.
+    pub fn clear_range(&mut self) {
+        self.items.retain(|i| i.key != KEEP_RANGE);
+    }
+
     /// The entry a fresh install starts with.
     pub fn standard(name: &str) -> Self {
         EffectsEntry { name: name.to_owned(), ..EffectsEntry::default() }
@@ -409,397 +383,64 @@ impl EffectsEntry {
         self
     }
 
-    fn first<T>(&self, read: impl Fn(&Item) -> Option<T>) -> Option<T> {
-        self.items.iter().find_map(read)
-    }
-
-    pub fn trim_silence(&self) -> Option<TrimSilence> {
-        self.first(Item::as_trim_silence)
-    }
-
-    pub fn cut_range(&self) -> Option<CutRange> {
-        self.first(Item::as_cut_range)
-    }
-
-    pub fn limit_duration(&self) -> Option<LimitDuration> {
-        self.first(Item::as_limit_duration)
-    }
-
-    pub fn volume(&self) -> Option<Volume> {
-        self.first(Item::as_volume)
-    }
-
-    pub fn silence_end(&self) -> Option<SilenceEnd> {
-        self.first(Item::as_silence_end)
-    }
-
-    pub fn replaygain(&self) -> Option<ReplayGainTags> {
-        self.first(Item::as_replaygain)
-    }
-
-    /// The speed ratio of all the tempo effects listed (1.0 when there is none).
-    pub fn tempo_ratio(&self) -> f64 {
-        self.ratio_before(self.items.len())
-    }
-
-    /// The speed ratio of the tempo effects listed before the item at `end`.
-    fn ratio_before(&self, end: usize) -> f64 {
-        self.items.iter().take(end).filter_map(Item::speed).filter(|r| *r > 0.0).product()
-    }
-
     /// What is wrong with the order of the effects: one that runs before another which changes what it works on.
     pub fn order_problems(&self) -> Vec<String> {
         let Some(cat) = catalog() else { return Vec::new() };
         cat.order(&self.items.iter().filter(|i| i.is_ready()).map(|i| i.key.clone()).collect::<Vec<_>>()).problems
     }
 
-    /// Does any effect need to know where the sound starts or stops?
-    pub fn needs_scan(&self) -> bool {
-        self.trim_silence().is_some() || self.silence_end().is_some()
-    }
-
-    /// Does any effect need the loudness, the peak or the ReplayGain figures of what is kept?
-    pub fn needs_meter(&self) -> bool {
-        self.replaygain().is_some() || self.volume().is_some_and(|v| v.mode != VolumeMode::Gain)
-    }
-
-    /// Does any effect use the album's gain?
-    pub fn needs_album(&self) -> bool {
-        self.replaygain().is_some_and(|r| r.album) || self.volume().is_some_and(|v| v.mode == VolumeMode::ReplayGain && v.album)
-    }
-
-    /// Does any effect need the file measured first?
-    pub fn needs_analysis(&self) -> bool {
-        self.needs_scan() || self.needs_meter()
-    }
-
-    /// Would the audio change?
-    pub fn changes_audio(&self) -> bool {
-        self.items.iter().any(|i| i.op() != Some(Op::TagsReplayGain))
-    }
-
-    /// The level (dBFS) below which the scan counts the sound as silence: the trim's own, else the silence at the end's.
-    pub fn scan_threshold_db(&self) -> f64 {
-        self.trim_silence().map(|t| t.threshold_db).or_else(|| self.silence_end().map(|s| s.threshold_db)).unwrap_or(-60.0)
-    }
-
-    /// The filters of the listed effects that are not measured, in the order listed, for the items in `range`. `length_s` is the length of what is kept before any tempo change: the fades are placed on it, taking the tempo
-    /// effects listed above them into account. An effect that cannot be written is left out here (the job says why first, `try_chain`).
-    pub fn chain(&self, range: std::ops::Range<usize>, length_s: f64) -> Vec<String> {
-        self.try_chain(range, length_s).unwrap_or_default()
-    }
-
-    /// `chain`, or why an effect cannot be written.
-    pub fn try_chain(&self, range: std::ops::Range<usize>, length_s: f64) -> Result<Vec<String>, String> {
-        let Some(cat) = catalog() else {
-            return if self.items.iter().any(|i| !i.is_measured()) { Err("the effects are not installed yet: they come with ffmpeg".to_owned()) } else { Ok(Vec::new()) };
-        };
-        let mut out = Vec::new();
-        for (at, item) in self.items.iter().enumerate().take(range.end).skip(range.start) {
-            if item.is_measured() {
-                if item.op().is_none() {
-                    return Err(format!("{}: this version of the app cannot do it", item.title()));
-                }
-                continue;
-            }
-            let effect = item.effect().ok_or_else(|| format!("{}: not available with this ffmpeg", item.title()))?;
-            if !item.is_ready() {
-                continue;
-            }
-            let ctx: Ctx = [("duration".to_owned(), format!("{}", length_s / self.ratio_before(at).max(1e-9)))].into_iter().collect();
-            let built = fx::build(&effect, &cat.filters, &item.all_values(), &ctx).map_err(|e| format!("{}: {e}", item.title()))?;
-            out.extend(built.audio.filter(|a| !a.is_empty()));
-        }
-        Ok(out)
-    }
-
-    /// Check every effect can be written (the job fails with the reason before anything runs).
-    pub fn check(&self) -> Result<(), String> {
-        self.try_chain(0..self.items.len(), 1.0).map(|_| ())
-    }
-
-    /// The place of the first volume effect in the list (the end of the list when there is none).
-    fn volume_at(&self) -> usize {
-        self.items.iter().position(Item::is_volume).unwrap_or(self.items.len())
-    }
 }
 
-/// What the measuring passes found out about one file.
-#[derive(Clone, Debug, Default, PartialEq)]
-pub struct Analysis {
-    pub duration_s: f64,
-    /// Where the sound starts: the end of a silence that begins at the start of the file. `None`
-    /// when the file does not begin in silence.
-    pub song_start_s: Option<f64>,
-    /// Where the sound stops: the start of the silence that runs to the end. `None` when the file
-    /// does not end in silence (the sound runs to the last sample).
-    pub song_end_s: Option<f64>,
-    /// Integrated loudness, LUFS. `None` for a file with no measurable sound.
-    pub loudness_lufs: Option<f64>,
-    /// True peak, dBFS.
-    pub true_peak_db: Option<f64>,
-    /// The highest sample, dBFS (`volumedetect`).
-    pub max_volume_db: Option<f64>,
-    /// ReplayGain's track gain (dB) and peak (linear) from ffmpeg's `replaygain` filter.
-    pub rg_gain_db: Option<f64>,
-    pub rg_peak: Option<f64>,
-}
-
-/// The album's ReplayGain figures: gain (dB) and the highest peak (linear) of its tracks.
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Album {
-    pub gain_db: f64,
-    pub peak: f64,
-}
-
-/// The filter of the first pass: where the sound starts and stops.
-pub fn scan_filter(threshold_db: f64) -> String {
-    format!("silencedetect=n={threshold_db}dB:d=0.1")
-}
-
-/// The meters: highest sample, integrated loudness and true peak, ReplayGain.
-pub const METER_FILTER: &str = "volumedetect,ebur128=peak=true:framelog=quiet,replaygain";
-
-/// The filter of the second pass: the meters over the part that is kept, after everything that
-/// changes how loud it is (the volume is set from what is measured here).
-pub fn meter_filter(entry: &EffectsEntry, w: &Window, duration_s: f64) -> String {
-    let mut parts: Vec<String> = Vec::new();
-    parts.extend(w.cut_filter(duration_s));
-    parts.extend(entry.chain(0..entry.volume_at(), w.length()));
-    parts.push(METER_FILTER.to_owned());
-    parts.join(",")
-}
-
-fn number_after(line: &str, key: &str) -> Option<f64> {
-    let rest = line.split(key).nth(1)?;
-    let token: String = rest
-        .trim_start_matches([' ', '=', ':'])
-        .chars()
-        .take_while(|c| c.is_ascii_digit() || matches!(c, '+' | '-' | '.' | 'e' | 'E'))
-        .collect();
-    token.parse::<f64>().ok().filter(|v| v.is_finite())
-}
-
-/// Read what a measuring pass printed (its stderr) into an [`Analysis`]. `duration_s` is the
-/// length of what was measured.
-pub fn parse_analysis(stderr: &str, duration_s: f64) -> Analysis {
-    let mut a = Analysis { duration_s, ..Analysis::default() };
-    let mut last_start: Option<f64> = None;
-    let mut in_true_peak = false;
-    for raw in stderr.lines() {
-        let line = raw.trim();
-        if let Some(v) = line.split("silence_start:").nth(1) {
-            last_start = v.trim().parse::<f64>().ok();
-        } else if line.contains("silence_end:") {
-            let end = number_after(line, "silence_end:");
-            if let (Some(start), Some(end)) = (last_start, end) {
-                // Closed at the end of the file: the sound stops where this silence began.
-                if duration_s > 0.0 && (duration_s - end).abs() < 0.05 {
-                    a.song_end_s = Some(start.max(0.0));
-                }
-                // Begun at the start of the file: the sound starts where this silence ends.
-                if start <= 0.05 && a.song_start_s.is_none() {
-                    a.song_start_s = Some(end.max(0.0));
-                }
-            }
-            last_start = None;
-        } else if line.starts_with("I:") && line.contains("LUFS") {
-            a.loudness_lufs = number_after(line, "I:");
-        } else if line.starts_with("True peak:") {
-            in_true_peak = true;
-        } else if in_true_peak && line.starts_with("Peak:") {
-            a.true_peak_db = number_after(line, "Peak:");
-            in_true_peak = false;
-        } else if line.contains("max_volume:") {
-            a.max_volume_db = number_after(line, "max_volume:");
-        } else if line.contains("track_gain") {
-            a.rg_gain_db = number_after(line, "track_gain =");
-        } else if line.contains("track_peak") {
-            a.rg_peak = number_after(line, "track_peak =");
-        }
-    }
-    // A silence that was opened and never closed (ffmpeg printed no end) also runs to the end.
-    if a.song_end_s.is_none() {
-        if let Some(s) = last_start {
-            a.song_end_s = Some(s.max(0.0));
-        }
-    }
-    a
-}
-
-/// The part of the source that is kept, and what follows it.
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Window {
-    pub start: f64,
-    pub end: f64,
-    /// Silence appended after the kept part.
-    pub pad: f64,
-}
-
-impl Window {
-    pub fn length(&self) -> f64 {
-        (self.end - self.start).max(0.0)
-    }
-
-    /// The filter that keeps only the window, or `None` when the whole file is kept.
-    pub fn cut_filter(&self, duration_s: f64) -> Option<String> {
-        if self.start > 0.001 || self.end < duration_s - 0.001 {
-            Some(format!("atrim=start={:.6}:end={:.6},asetpts=PTS-STARTPTS", self.start, self.end))
-        } else {
-            None
-        }
-    }
-}
-
-/// Which part of the source is kept, from the effects that cut: trim silence, cut range, limit
-/// duration and the cut of silence at the end - in that order, each working on what is left by the
-/// one before it.
-pub fn window(entry: &EffectsEntry, a: &Analysis) -> Window {
-    let dur = a.duration_s.max(0.0);
-    let (mut start, mut end) = (0.0_f64, dur);
-    let song_start = a.song_start_s.unwrap_or(0.0).clamp(0.0, dur);
-    let song_end = a.song_end_s.unwrap_or(dur).clamp(0.0, dur);
-
-    if let Some(t) = entry.trim_silence() {
-        let margin = f64::from(t.margin_ms) / 1000.0;
-        if t.start {
-            start = (song_start - margin).max(0.0);
-        }
-        if t.end {
-            end = (song_end + margin).min(dur);
-        }
-    }
-    if let Some(c) = entry.cut_range() {
-        let from = start + c.from_s;
-        let to = if c.to_s > 0.0 { (start + c.to_s).min(end) } else { end };
-        // A range that falls outside what is left keeps what is left, rather than nothing.
-        if from < to {
-            start = from;
-            end = to;
-        }
-    }
-    if let Some(l) = entry.limit_duration() {
-        end = end.min(start + l.seconds);
-    }
-    let mut pad = 0.0;
-    if let Some(s) = entry.silence_end() {
-        let music_end = song_end.clamp(start, end);
-        let existing = (end - music_end).max(0.0);
-        let want = s.seconds.max(0.0);
-        let margin = (f64::from(s.margin_ms) / 1000.0).min(want);
-        // Keep a little of the original tail (never more than there is, never more than wanted); the
-        // rest of the gap is appended, so the silence after the song is exactly `want`.
-        let kept = existing.min(margin);
-        end = music_end + kept;
-        pad = (want - kept).max(0.0);
-    }
-    Window { start, end, pad }
-}
-
-/// Exact instructions for one file.
-#[derive(Clone, Debug, Default, PartialEq)]
-pub struct EffectsPlan {
-    /// Audio filters, in order, joined by a comma into one `-af`. Empty = the audio is not changed.
-    pub filters: Vec<String>,
-    /// How long the output will be, when the chain changes it.
-    pub expected_s: Option<f64>,
-    /// Tags to write after the cleaning has been applied: they describe the OUTPUT file.
-    pub tags: Vec<(String, String)>,
-    /// The gain applied, dB (for reporting and tests).
-    pub applied_gain_db: Option<f64>,
-}
-
-impl EffectsPlan {
-    pub fn af(&self) -> Option<String> {
-        (!self.filters.is_empty()).then(|| self.filters.join(","))
-    }
-}
-
-fn db_to_linear(db: f64) -> f64 {
-    10f64.powf(db / 20.0)
-}
-
-/// Turn an entry, a file's analysis and (when an effect asked for it) its album into filter
-/// arguments, the output length and the tags.
-///
-/// The order: what is kept is cut out, then the effects listed above the volume, the volume (a gain, with a limiter where it could
-/// clip), the effects listed below it, and last the silence - so the gain was computed from the sound the effects above it leave, and
-/// the silence is untouched.
-pub fn plan(entry: &EffectsEntry, a: &Analysis, album: Option<&Album>) -> EffectsPlan {
-    let mut p = EffectsPlan::default();
-    let w = window(entry, a);
-    // A tempo change moves every later time: the fades and the silence are placed on the new length.
-    let ratio = entry.tempo_ratio();
-    let length = w.length() / ratio;
-
-    if let Some(cut) = w.cut_filter(a.duration_s) {
-        p.filters.extend(cut.split(',').map(str::to_owned));
-    }
-    // What is listed above the volume, then the volume, then the rest.
-    let split = entry.volume_at();
-    p.filters.extend(entry.chain(0..split, w.length()));
-
-    // The volume.
-    let mut limit_to: Option<f64> = None;
-    if let Some(v) = entry.volume() {
-        let gain = match v.mode {
-            VolumeMode::Loudness => a.loudness_lufs.map(|i| v.target_lufs - i),
-            VolumeMode::Peak => a.max_volume_db.map(|m| v.target_peak_db - m),
-            VolumeMode::ReplayGain => match (v.album, album) {
-                (true, Some(al)) => Some(al.gain_db),
-                _ => a.rg_gain_db,
-            },
-            VolumeMode::Gain => Some(v.gain_db),
-        };
-        if let Some(g) = gain {
-            p.filters.push(format!("volume={g:.3}dB"));
-            if v.mode != VolumeMode::Peak {
-                let ceiling = db_to_linear(v.ceiling_db);
-                p.filters.push(format!("alimiter=limit={ceiling:.6}:level=0"));
-                limit_to = Some(ceiling);
-            }
-            p.applied_gain_db = Some(g);
-        }
-    }
-
-    p.filters.extend(entry.chain(split..entry.items.len(), w.length()));
-
-    if entry.silence_end().is_some() {
-        p.filters.push(format!("apad=pad_dur={:.6}", w.pad));
-    }
-
-    let changed_length =
-        w.cut_filter(a.duration_s).is_some() || entry.silence_end().is_some() || (ratio - 1.0).abs() > 1e-9;
-    if changed_length {
-        p.expected_s = Some(length + w.pad);
-    }
-
-    if let Some(r) = entry.replaygain() {
-        if let (Some(g), Some(peak)) = (a.rg_gain_db, a.rg_peak) {
-            // The tags describe the file that is written. If a gain was applied the remaining
-            // adjustment is smaller by that gain, and the peak has moved with it (never past the
-            // limiter's ceiling).
-            let applied = p.applied_gain_db.unwrap_or(0.0);
-            let moved = |peak: f64| {
-                let moved = peak * db_to_linear(applied);
-                limit_to.map_or(moved, |c| moved.min(c))
-            };
-            p.tags.push(("REPLAYGAIN_TRACK_GAIN".to_owned(), format!("{:+.2} dB", g - applied)));
-            p.tags.push(("REPLAYGAIN_TRACK_PEAK".to_owned(), format!("{:.6}", moved(peak))));
-            if let (true, Some(al)) = (r.album, album) {
-                p.tags.push(("REPLAYGAIN_ALBUM_GAIN".to_owned(), format!("{:+.2} dB", al.gain_db - applied)));
-                p.tags.push(("REPLAYGAIN_ALBUM_PEAK".to_owned(), format!("{:.6}", moved(al.peak))));
-            }
-        }
-    }
-    p
-}
 
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn the_users_favourites_replace_the_standard_level_except_for_what_the_app_is_wired_to() {
+        let cat = catalog().expect("the fixture reads");
+        let by_level = standard_keys_by(&cat, "windows", None);
+        assert!(by_level.contains(&"try:chorus".to_owned()) && by_level.contains(&"equalizer".to_owned()), "{by_level:?}");
+        let chosen = vec!["try:flanger".to_owned()];
+        let mine = standard_keys_by(&cat, "windows", Some(&chosen));
+        assert!(mine.contains(&"try:flanger".to_owned()), "what he ticked is listed: {mine:?}");
+        assert!(!mine.contains(&"try:chorus".to_owned()), "what he did not tick is not: {mine:?}");
+        assert!(mine.contains(&"equalizer".to_owned()), "an effect the app is wired to is listed whatever he chose: {mine:?}");
+        let none: Vec<String> = Vec::new();
+        assert!(!standard_keys_by(&cat, "windows", Some(&none)).is_empty(), "an empty choice still leaves the wired effects");
+    }
+
+    #[test]
+    fn marks_write_the_range_and_never_leave_one_that_keeps_nothing() {
+        test_fixture();
+        let mut e = EffectsEntry::new("work");
+        e.mark_range(Some(10.0), None);
+        assert_eq!(e.items.len(), 1, "the range effect is added by the first mark");
+        assert_eq!(e.cut_range().map(|c| (c.from_s, c.to_s)), Some((10.0, 0.0)));
+        e.mark_range(None, Some(25.5));
+        assert_eq!(e.cut_range().map(|c| (c.from_s, c.to_s)), Some((10.0, 25.5)));
+        e.mark_range(Some(30.0), None);
+        assert_eq!(e.cut_range().map(|c| (c.from_s, c.to_s)), Some((30.0, 0.0)), "a start past the end clears the end");
+        e.mark_range(None, Some(20.0));
+        assert_eq!(e.cut_range().map(|c| (c.from_s, c.to_s)), Some((0.0, 20.0)), "an end before the start clears the start");
+        e.clear_range();
+        assert!(e.items.is_empty() && e.cut_range().is_none());
+    }
+
+    #[test]
+    fn what_is_cut_after_the_silence_is_not_part_of_where_a_range_counts_from() {
+        test_fixture();
+        let mut e = EffectsEntry::new("work");
+        e.items.push(Item::new("trim-silence"));
+        e.mark_range(Some(5.0), Some(9.0));
+        e.items.push(Item::new("limit-duration"));
+        e.items.push(Item::new("silence-end"));
+        let rest = e.without_cuts();
+        assert_eq!(rest.items.len(), 1);
+        assert_eq!(rest.items[0].key, "trim-silence");
+    }
 
     #[test]
     fn a_language_without_translations_stays_english_and_one_with_them_changes_the_words() {
@@ -893,10 +534,10 @@ mod tests {
 
     #[test]
     fn the_list_keeps_the_order_the_user_gave_and_survives_json() {
-        let e = entry(vec![Item::new(REPLAYGAIN_TAGS), Item::with("fade-out", &[("length", json!(1234))]), Item::new(TRIM_SILENCE), Item::new("")]);
+        let e = entry(vec![Item::new(REPLAYGAIN_TAGS), Item::with("sound-fade", &[("fade_out", json!(1.2))]), Item::new(TRIM_SILENCE), Item::new("")]);
         let e = e.normalized();
         let keys: Vec<&str> = e.items.iter().map(|i| i.key.as_str()).collect();
-        assert_eq!(keys, [REPLAYGAIN_TAGS, "fade-out", TRIM_SILENCE], "an item naming no effect is dropped, the rest is not moved");
+        assert_eq!(keys, [REPLAYGAIN_TAGS, "sound-fade", TRIM_SILENCE], "an item naming no effect is dropped, the rest is not moved");
         let back: EffectsEntry = serde_json::from_str(&serde_json::to_string(&e).unwrap()).unwrap();
         assert_eq!(back, e);
     }
@@ -914,11 +555,11 @@ mod tests {
     fn a_file_saved_with_the_old_kinds_loses_them_and_keeps_the_rest() {
         let old = r#"{ "id": "x", "name": "Old", "items": [
             { "trim_silence": { "start": true } },
-            { "key": "fade-out", "values": { "length": 1500 } } ] }"#;
+            { "key": "sound-fade", "values": { "fade_out": 1.5 } } ] }"#;
         let e: EffectsEntry = serde_json::from_str(old).unwrap();
         let e = e.normalized();
         let keys: Vec<&str> = e.items.iter().map(|i| i.key.as_str()).collect();
-        assert_eq!(keys, ["fade-out"], "an effect of the old shape names no effect now");
+        assert_eq!(keys, ["sound-fade"], "an effect of the old shape names no effect now");
         assert_eq!((e.id.as_str(), e.name.as_str()), ("x", "Old"));
     }
 
@@ -938,9 +579,9 @@ mod tests {
 
     #[test]
     fn the_speed_comes_from_the_filter_the_catalogue_names() {
-        let e = entry(vec![Item::with("try:atempo", &[("tempo", json!(2))]), Item::new("fade-out")]);
+        let e = entry(vec![Item::with("try:atempo", &[("tempo", json!(2))]), Item::with("sound-fade", &[("fade_out", json!(2))])]);
         assert!((e.tempo_ratio() - 2.0).abs() < 1e-9);
-        assert!((entry(vec![Item::new("fade-out")]).tempo_ratio() - 1.0).abs() < 1e-9);
+        assert!((entry(vec![Item::with("sound-fade", &[("fade_out", json!(2))])]).tempo_ratio() - 1.0).abs() < 1e-9);
     }
 
     #[test]
@@ -1008,13 +649,53 @@ mod tests {
     }
 
     #[test]
+    fn the_equaliser_is_a_drawer_and_is_listed_only_while_a_band_is_off_zero() {
+        let cat = catalog().expect("the fixture reads");
+        let w = widgets(&cat, "windows").into_iter().find(|w| w.key == "equalizer").expect("the equaliser is a widget");
+        assert_eq!(w.kind, "tone");
+        let mut e = entry(vec![]);
+        let mut v = Item::new("equalizer").all_values();
+        v.insert("g1k".to_owned(), V::Num(4.0));
+        e.set_widget("equalizer", Some(&v));
+        assert_eq!(e.items.len(), 1, "a band off zero puts the effect in the list");
+        let af = plan(&e, &song(60.0, None, None), None).af().unwrap();
+        assert!(af.contains("equalizer=frequency=1000") && af.contains("gain=4"), "{af}");
+        v.insert("g1k".to_owned(), V::Num(0.0));
+        e.set_widget("equalizer", Some(&v));
+        assert!(e.items.is_empty(), "every band back at zero takes it out again");
+    }
+
+    #[test]
+    fn the_drawers_cover_the_equaliser_the_compressor_the_volume_the_channels_and_the_fade() {
+        let cat = catalog().expect("the fixture reads");
+        let kinds: Vec<(String, String)> = widgets(&cat, "windows").into_iter().map(|w| (w.key, w.kind)).collect();
+        for (key, kind) in [("equalizer", "tone"), ("compressor", "compressor"), ("volume-gain", "level"), ("volume-loudness", "level"), ("volume-peak", "level"), ("volume-replaygain", "level"), ("channels", "channels"), ("sound-fade", "fades")] {
+            assert!(kinds.contains(&(key.to_owned(), kind.to_owned())), "{key} is drawn as {kind}: {kinds:?}");
+        }
+    }
+
+    #[test]
+    fn an_effect_chosen_by_a_drawer_stays_in_the_list_at_its_defaults() {
+        let mut e = entry(vec![]);
+        let defaults = Item::new("channels").all_values();
+        e.set_widget("channels", Some(&defaults));
+        assert!(e.items.is_empty(), "a widget at its defaults leaves the list");
+        e.set_item("channels", Some(&defaults));
+        assert_eq!(e.items.len(), 1, "a chosen action stays, even when the way chosen is the default one");
+        let af = plan(&e, &song(60.0, None, None), None).af().unwrap();
+        assert!(af.contains("stereo|c0=c1|c1=c0"), "{af}");
+        e.set_item("channels", None);
+        assert!(e.items.is_empty());
+    }
+
+    #[test]
     fn fades_ride_on_the_kept_part() {
-        let e = entry(vec![Item::new(LIMIT_DURATION), Item::new("fade-in"), Item::new("fade-out")]);
+        let e = entry(vec![Item::new(LIMIT_DURATION), Item::with("sound-fade", &[("fade_in", json!(2)), ("fade_out", json!(2))])]);
         let af = plan(&e, &song(200.0, None, None), None).af().unwrap();
         assert!(af.contains("afade=type=in:start_time=0:duration=2"), "{af}");
         assert!(af.contains("afade=type=out:start_time=28:duration=2"), "{af}");
         // A fade longer than the song is the whole song.
-        let short = entry(vec![Item::with("fade-out", &[("length", json!(9000))])]);
+        let short = entry(vec![Item::with("sound-fade", &[("fade_out", json!(9))])]);
         let af = plan(&short, &song(3.0, None, None), None).af().unwrap();
         assert!(af.contains("afade=type=out:start_time=0:duration=3"), "{af}");
     }
@@ -1110,7 +791,7 @@ mod tests {
 
     #[test]
     fn a_tempo_change_moves_the_length_the_fades_and_the_silence_follow() {
-        let e = entry(vec![Item::with(TEMPO, &[("tempo", json!(2))]), Item::with("fade-out", &[("length", json!(1000))]), silence_end(&[])]);
+        let e = entry(vec![Item::with(TEMPO, &[("tempo", json!(2))]), Item::with("sound-fade", &[("fade_out", json!(1))]), silence_end(&[])]);
         // 20 s of sound twice as fast = 10 s; the fade-out is the last second of THOSE 10, then 2 s.
         let p = plan(&e, &song(20.0, None, None), None);
         let af = p.af().unwrap();
@@ -1133,7 +814,7 @@ mod tests {
         let p = plan(&e, &Analysis { duration_s: 10.0, ..Analysis::default() }, None);
         assert!(p.af().is_none() && p.tags.is_empty() && p.expected_s.is_none());
         // A fixed gain and fades need no measuring at all.
-        let g = entry(vec![Item::new("fade-in"), Item::new(VOLUME_GAIN)]);
+        let g = entry(vec![Item::with("sound-fade", &[("fade_in", json!(2))]), Item::new(VOLUME_GAIN)]);
         assert!(!g.needs_analysis() && g.changes_audio());
     }
 }

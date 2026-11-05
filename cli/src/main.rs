@@ -34,7 +34,7 @@ enum OverwriteArg {
     Rename,
 }
 
-/// Convert audio files with the presets, tag settings, effects and destinations saved in Audio Converter.
+/// Convert audio files with the presets, tag settings, effects and destinations saved in FFmpeg Audio Studio.
 #[derive(Parser)]
 #[command(name = "yac", version = VERSION)]
 struct Args {

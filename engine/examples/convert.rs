@@ -1,11 +1,11 @@
 //! A command-line front end to the same engine the window uses - for checking a real library
 //! without the window:
 //!
-//!   cargo run -p audio-converter-engine --example convert -- <format> <id3: 23|24> <out folder> <files...>
+//!   cargo run -p ffmpeg-audio-studio-engine --example convert -- <format> <id3: 23|24> <out folder> <files...>
 //!
 //! It converts into `<out folder>` with the built-in "source" naming, never beside the originals.
 
-use audio_converter_engine::{Destination, Format, Id3Version, JobSpec, JobStatus, Overwrite, Preset, Runner, TagCleanup};
+use ffmpeg_audio_studio_engine::{Destination, Format, Id3Version, JobSpec, JobStatus, Overwrite, Preset, Runner, TagCleanup};
 use std::{path::PathBuf, thread, time::Duration};
 
 fn main() {
@@ -17,7 +17,7 @@ fn main() {
     let format = Format::from_id(&a[0]).unwrap_or_else(|| panic!("unknown format {}", a[0]));
     let id3 = if a[1] == "24" { Id3Version::V24 } else { Id3Version::V23 };
     let out = PathBuf::from(&a[2]);
-    let ffmpeg = audio_converter_engine::ffmpeg::locate(audio_converter_engine::settings::ffmpeg_dir().as_deref()).expect("no ffmpeg installed: start the app once");
+    let ffmpeg = ffmpeg_audio_studio_engine::ffmpeg::locate(ffmpeg_audio_studio_engine::settings::ffmpeg_dir().as_deref()).expect("no ffmpeg installed: start the app once");
     let runner = Runner::new(ffmpeg);
     let dest = Destination { folder: out.to_string_lossy().into_owned(), ..Destination::new("cli", "") };
     let specs: Vec<JobSpec> = a[3..]

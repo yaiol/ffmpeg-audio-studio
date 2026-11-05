@@ -12,10 +12,13 @@ pub mod ffmpeg;
 pub mod ffmpeg_effects;
 pub mod format;
 pub mod i18n;
+pub mod log;
+pub mod measured;
 pub mod lyrics;
 pub mod mapping;
 pub mod options;
 pub mod preset;
+pub mod preview;
 pub mod queue;
 pub mod riff;
 pub mod settings;
@@ -27,7 +30,7 @@ pub use destination::{Destination, Overwrite};
 pub use format::Format;
 pub use options::{EncoderOptions, FlacStereo, OpusApplication, OpusBandwidth, OpusVbr};
 pub use preset::{Id3Version, Preset, QualityKind, RateControl};
-pub use queue::{JobSpec, JobStatus, Runner};
+pub use queue::{command_line, JobSpec, JobStatus, Runner};
 
 use std::cmp::Ordering;
 

@@ -1,7 +1,7 @@
 //! Prints the RAW tag names a file carries, per tag family - what a tagger would show as the field
 //! name - so the mapping of one field across formats can be read off real files.
 //!
-//!   cargo run -q -p audio-converter-engine --example dump_tags -- <files...>
+//!   cargo run -q -p ffmpeg-audio-studio-engine --example dump_tags -- <files...>
 //!
 //! One line per field: `<family>\t<name>\t<value, 40 chars>`. Families: vorbis, id3, ilst, riff-info,
 //! asf. Pictures are listed as `(picture)`.
@@ -167,7 +167,7 @@ fn main() {
                     }
                 }
             }
-            "wma" => match audio_converter_engine::asf::attributes(path) {
+            "wma" => match ffmpeg_audio_studio_engine::asf::attributes(path) {
                 Ok(a) => a.iter().for_each(|(n, v)| println!("asf	{n}	{}", short(v))),
                 Err(e) => println!("asf	(error)	{e}"),
             },

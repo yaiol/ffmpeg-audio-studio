@@ -7,7 +7,7 @@
 //! key at the call site.
 
 use crate::{
-    catalog::NumberInput,
+    catalog::UisNum,
     i18n,
     settings::Settings,
 };
@@ -29,6 +29,7 @@ pub const PRESETS: &str = "presets";
 pub const DESTINATIONS: &str = "destinations";
 pub const CLEANUPS: &str = "cleanups";
 pub const EFFECTS: &str = "effects";
+pub const FFMPEG: &str = "ffmpeg";
 pub const NOTIFICATIONS: &str = "notifications";
 
 /// Put the dragged entry into the slot of the one it was dragged over. The order of the saved list IS
@@ -124,11 +125,11 @@ fn ExceptionsField(settings: Signal<Settings>, id: String, lang: String, mode: C
     let onkeyup_track = track.clone();
     let onclick_track = track;
     rsx! {
-        div { class: "dlg-field",
-            label { class: "dlg-field-label", "{label}" }
+        div { class: "uis-fld-labelled",
+            label { class: "uis-fld-labelled-label", "{label}" }
             textarea {
                 id: "{box_id}",
-                class: "textarea",
+                class: "uis-txt-area",
                 rows: "5",
                 spellcheck: "false",
                 value: "{raw}",
@@ -151,7 +152,7 @@ fn ExceptionsField(settings: Signal<Settings>, id: String, lang: String, mode: C
                             rsx! {
                                 button {
                                     key: "{name}",
-                                    class: "chip",
+                                    class: "uis-chp",
                                     onclick: move |_| {
                                         let (new_text, end) = replace_span(&raw(), (start, end), name);
                                         let list: Vec<String> = new_text.lines().map(str::to_owned).collect();
@@ -170,7 +171,7 @@ fn ExceptionsField(settings: Signal<Settings>, id: String, lang: String, mode: C
                     }
                 }
             }
-            p { class: "hint", "{hint}" }
+            p { class: "uis-hnt", "{hint}" }
         }
     }
 }
@@ -232,11 +233,8 @@ pub fn PresetEditor(settings: Signal<Settings>) -> Element {
     let s_vbr = t("lblPrsRateVbr");
     let s_abr = t("lblPrsRateAbr");
     let s_sample_rate = t("lblPrsSampleRate");
-    let s_channels = t("lblPrsChannels");
     let s_bit_depth = t("lblPrsBitDepth");
     let s_keep = t("lblPrsKeep");
-    let s_mono = t("lblPrsMono");
-    let s_stereo = t("lblPrsStereo");
     let s_ringtone = t("msgPrsRingtoneLimit");
     let s_id3 = t("lblPrsId3Version");
     let s_id3_hint = t("msgPrsId3Hint");
@@ -252,7 +250,6 @@ pub fn PresetEditor(settings: Signal<Settings>) -> Element {
     let id_for_rate = cur_id.clone();
     let id_for_quality = cur_id.clone();
     let id_for_sr = cur_id.clone();
-    let id_for_ch = cur_id.clone();
     let id_for_bd = cur_id.clone();
     let id_for_dither = cur_id.clone();
     let id_for_id3 = cur_id.clone();
@@ -265,10 +262,10 @@ pub fn PresetEditor(settings: Signal<Settings>) -> Element {
 
     rsx! {
         div { class: "manager",
-            div { class: "manager-list",
+            div { class: "manager-list uis-lvw-reorder",
                 div { class: "manager-actions",
                     button {
-                        class: "btn icon",
+                        class: "uis-btn ico",
                         title: "{s_new}",
                         "aria-label": "{s_new}",
                         onclick: move |_| {
@@ -280,7 +277,7 @@ pub fn PresetEditor(settings: Signal<Settings>) -> Element {
                         Icon { width: 14, height: 14, icon: LdPlus }
                     }
                     button {
-                        class: "btn icon",
+                        class: "uis-btn ico",
                         title: "{s_dup}",
                         "aria-label": "{s_dup}",
                         onclick: move |_| {
@@ -295,7 +292,7 @@ pub fn PresetEditor(settings: Signal<Settings>) -> Element {
                         Icon { width: 14, height: 14, icon: LdCopy }
                     }
                     button {
-                        class: "btn icon",
+                        class: "uis-btn ico",
                         title: "{s_del}",
                         "aria-label": "{s_del}",
                         disabled: !can_delete,
@@ -308,7 +305,7 @@ pub fn PresetEditor(settings: Signal<Settings>) -> Element {
                         Icon { width: 14, height: 14, icon: LdTrash2 }
                     }
                 }
-                div { class: "lv-scroll",
+                div { class: "uis-lvw-scroll",
                     for p in listed.iter() {
                         {
                             let id = p.id.clone();
@@ -320,9 +317,9 @@ pub fn PresetEditor(settings: Signal<Settings>) -> Element {
                                 button {
                                     key: "{p.id}",
                                     class: match (active, moving) {
-                                        (_, true) => "lv-item reordering",
-                                        (true, _) => "lv-item active",
-                                        _ => "lv-item",
+                                        (_, true) => "uis-lvw-item reordering",
+                                        (true, _) => "uis-lvw-item active",
+                                        _ => "uis-lvw-item",
                                     },
                                     onpointerdown: move |e| {
                                         if e.trigger_button() == Some(MouseButton::Primary) {
@@ -342,22 +339,22 @@ pub fn PresetEditor(settings: Signal<Settings>) -> Element {
                                         selected.set(id.clone());
                                         settings.write().preset_id = id.clone();
                                     },
-                                    div { class: "lv-item-body",
-                                        div { class: "lv-item-name", "{p.name}" }
+                                    div { class: "uis-lvw-item-body",
+                                        div { class: "uis-lvw-item-name", "{p.name}" }
                                     }
-                                    span { class: "lv-item-badge", "{p.format.label()}" }
+                                    span { class: "uis-lvw-item-badge", "{p.format.label()}" }
                                 }
                             }
                         }
                     }
                 }
-                p { class: "hint", "{s_reorder}" }
+                p { class: "uis-hnt", "{s_reorder}" }
             }
             div { class: "manager-form",
-                div { class: "dlg-field",
-                    label { class: "dlg-field-label", "{s_name}" }
+                div { class: "uis-fld-labelled",
+                    label { class: "uis-fld-labelled-label", "{s_name}" }
                     input {
-                        class: "input",
+                        class: "uis-txt",
                         value: "{current.name}",
                         oninput: move |e| {
                             let v = e.value();
@@ -365,10 +362,10 @@ pub fn PresetEditor(settings: Signal<Settings>) -> Element {
                         },
                     }
                 }
-                div { class: "dlg-field",
-                    label { class: "dlg-field-label", "{s_format}" }
+                div { class: "uis-fld-labelled",
+                    label { class: "uis-fld-labelled-label", "{s_format}" }
                     select {
-                        class: "select",
+                        class: "uis-ddn-std",
                         value: "{current.format.id()}",
                         onchange: move |e| {
                             if let Some(f) = Format::from_id(&e.value()) {
@@ -381,13 +378,13 @@ pub fn PresetEditor(settings: Signal<Settings>) -> Element {
                     }
                 }
                 if current.format == Format::M4r {
-                    p { class: "hint", "{s_ringtone}" }
+                    p { class: "uis-hnt", "{s_ringtone}" }
                 }
                 if current.supports_vbr() {
-                    div { class: "dlg-field",
-                        label { class: "dlg-field-label", "{s_rate_control}" }
+                    div { class: "uis-fld-labelled",
+                        label { class: "uis-fld-labelled-label", "{s_rate_control}" }
                         select {
-                            class: "select",
+                            class: "uis-ddn-std",
                             value: match current.rate_control {
                                 RateControl::Vbr => "vbr",
                                 RateControl::Abr => "abr",
@@ -413,7 +410,7 @@ pub fn PresetEditor(settings: Signal<Settings>) -> Element {
                     // The standard number field, as wide as its largest value needs, with the unit as
                     // plain text beside it. The key makes it remount when its meaning changes (a
                     // bitrate to a quality level), so it never shows a value in the wrong scale.
-                    NumberField {
+                    LclFldNum {
                         key: "{current.format.id()}-{current.quality_kind() as u8}",
                         label: quality_label,
                         value: Some(current.quality_value().round() as u32),
@@ -429,10 +426,10 @@ pub fn PresetEditor(settings: Signal<Settings>) -> Element {
                         },
                     }
                 }
-                div { class: "dlg-field",
-                    label { class: "dlg-field-label", "{s_sample_rate}" }
+                div { class: "uis-fld-labelled",
+                    label { class: "uis-fld-labelled-label", "{s_sample_rate}" }
                     select {
-                        class: "select",
+                        class: "uis-ddn-std",
                         value: "{current.sample_rate.map(|r| r.to_string()).unwrap_or_default()}",
                         onchange: move |e| {
                             let v = e.value().parse::<u32>().ok();
@@ -444,25 +441,11 @@ pub fn PresetEditor(settings: Signal<Settings>) -> Element {
                         }
                     }
                 }
-                div { class: "dlg-field",
-                    label { class: "dlg-field-label", "{s_channels}" }
-                    select {
-                        class: "select",
-                        value: "{current.channels.map(|c| c.to_string()).unwrap_or_default()}",
-                        onchange: move |e| {
-                            let v = e.value().parse::<u8>().ok();
-                            edit_preset(settings, &id_for_ch, |p| p.channels = v);
-                        },
-                        option { value: "", selected: current.channels.is_none(), "{s_keep}" }
-                        option { value: "1", selected: current.channels == Some(1), "{s_mono}" }
-                        option { value: "2", selected: current.channels == Some(2), "{s_stereo}" }
-                    }
-                }
                 if current.supports_bit_depth() {
-                    div { class: "dlg-field",
-                        label { class: "dlg-field-label", "{s_bit_depth}" }
+                    div { class: "uis-fld-labelled",
+                        label { class: "uis-fld-labelled-label", "{s_bit_depth}" }
                         select {
-                            class: "select",
+                            class: "uis-ddn-std",
                             value: "{current.bit_depth.unwrap_or(16)}",
                             onchange: move |e| {
                                 let v = e.value().parse::<u8>().ok();
@@ -475,19 +458,28 @@ pub fn PresetEditor(settings: Signal<Settings>) -> Element {
                     }
                 }
                 if current.is_16_bit() {
-                    ToggleField {
-                        label: t("lblPrsDither"),
-                        checked: current.dither,
-                        on_change: {
-                            move |v| edit_preset(settings, &id_for_dither, |p| p.dither = v)
-                        },
+                    div { class: "uis-fld-labelled",
+                        label { class: "uis-chk-lbl",
+                            input {
+                                class: "uis-chk-box",
+                                r#type: "checkbox",
+                                checked: current.dither,
+                                onchange: {
+                                    let cb = {
+                                        move |v| edit_preset(settings, &id_for_dither, |p| p.dither = v)
+                                    };
+                                    move |e| cb(e.checked())
+                                },
+                            }
+                            {t("lblPrsDither")}
+                        }
                     }
                 }
                 if current.supports_id3_version() {
-                    div { class: "dlg-field",
-                        label { class: "dlg-field-label", "{s_id3}" }
+                    div { class: "uis-fld-labelled",
+                        label { class: "uis-fld-labelled-label", "{s_id3}" }
                         select {
-                            class: "select",
+                            class: "uis-ddn-std",
                             value: match current.id3_version { Id3Version::V23 => "v23", Id3Version::V24 => "v24" },
                             onchange: move |e| {
                                 let v = if e.value() == "v24" { Id3Version::V24 } else { Id3Version::V23 };
@@ -496,7 +488,7 @@ pub fn PresetEditor(settings: Signal<Settings>) -> Element {
                             option { value: "v23", selected: current.id3_version == Id3Version::V23, "ID3v2.3" }
                             option { value: "v24", selected: current.id3_version == Id3Version::V24, "ID3v2.4" }
                         }
-                        p { class: "hint", "{s_id3_hint}" }
+                        p { class: "uis-hnt", "{s_id3_hint}" }
                     }
                 }
                 AdvancedOptions { settings, id: cur_id.clone(), lang: lang.clone() }
@@ -565,10 +557,10 @@ pub fn DestinationEditor(settings: Signal<Settings>) -> Element {
 
     rsx! {
         div { class: "manager",
-            div { class: "manager-list",
+            div { class: "manager-list uis-lvw-reorder",
                 div { class: "manager-actions",
                     button {
-                        class: "btn icon",
+                        class: "uis-btn ico",
                         title: "{s_new}",
                         "aria-label": "{s_new}",
                         onclick: move |_| {
@@ -580,7 +572,7 @@ pub fn DestinationEditor(settings: Signal<Settings>) -> Element {
                         Icon { width: 14, height: 14, icon: LdPlus }
                     }
                     button {
-                        class: "btn icon",
+                        class: "uis-btn ico",
                         title: "{s_dup}",
                         "aria-label": "{s_dup}",
                         disabled: is_source,
@@ -596,7 +588,7 @@ pub fn DestinationEditor(settings: Signal<Settings>) -> Element {
                         Icon { width: 14, height: 14, icon: LdCopy }
                     }
                     button {
-                        class: "btn icon",
+                        class: "uis-btn ico",
                         title: "{s_del}",
                         "aria-label": "{s_del}",
                         disabled: is_source,
@@ -609,15 +601,15 @@ pub fn DestinationEditor(settings: Signal<Settings>) -> Element {
                         Icon { width: 14, height: 14, icon: LdTrash2 }
                     }
                 }
-                div { class: "lv-scroll",
+                div { class: "uis-lvw-scroll",
                     button {
-                        class: if is_source { "lv-item active" } else { "lv-item" },
+                        class: if is_source { "uis-lvw-item active" } else { "uis-lvw-item" },
                         onclick: move |_| {
                             selected.set(SOURCE_ID.to_owned());
                             settings.write().destination_id = SOURCE_ID.to_owned();
                         },
-                        div { class: "lv-item-body",
-                            div { class: "lv-item-name", "{s_source_label}" }
+                        div { class: "uis-lvw-item-body",
+                            div { class: "uis-lvw-item-name", "{s_source_label}" }
                         }
                     }
                     for d in dests.iter() {
@@ -631,9 +623,9 @@ pub fn DestinationEditor(settings: Signal<Settings>) -> Element {
                                 button {
                                     key: "{d.id}",
                                     class: match (active, moving) {
-                                        (_, true) => "lv-item reordering",
-                                        (true, _) => "lv-item active",
-                                        _ => "lv-item",
+                                        (_, true) => "uis-lvw-item reordering",
+                                        (true, _) => "uis-lvw-item active",
+                                        _ => "uis-lvw-item",
                                     },
                                     onpointerdown: move |e| {
                                         if e.trigger_button() == Some(MouseButton::Primary) {
@@ -653,16 +645,16 @@ pub fn DestinationEditor(settings: Signal<Settings>) -> Element {
                                         selected.set(id.clone());
                                         settings.write().destination_id = id.clone();
                                     },
-                                    div { class: "lv-item-body",
-                                        div { class: "lv-item-name", "{d.name}" }
-                                        div { class: "lv-item-sub", "{d.folder}" }
+                                    div { class: "uis-lvw-item-body",
+                                        div { class: "uis-lvw-item-name", "{d.name}" }
+                                        div { class: "uis-lvw-item-sub", "{d.folder}" }
                                     }
                                 }
                             }
                         }
                     }
                 }
-                p { class: "hint", "{s_reorder}" }
+                p { class: "uis-hnt", "{s_reorder}" }
             }
             div { class: "manager-form",
                 if let Some(d) = current {
@@ -675,10 +667,10 @@ pub fn DestinationEditor(settings: Signal<Settings>) -> Element {
                         let folder_empty = d.folder.trim().is_empty();
                         let pattern_now = d.pattern.clone();
                         rsx! {
-                            div { class: "dlg-field",
-                                label { class: "dlg-field-label", "{s_name}" }
+                            div { class: "uis-fld-labelled",
+                                label { class: "uis-fld-labelled-label", "{s_name}" }
                                 input {
-                                    class: "input",
+                                    class: "uis-txt",
                                     value: "{d.name}",
                                     oninput: move |e| {
                                         let v = e.value();
@@ -686,11 +678,11 @@ pub fn DestinationEditor(settings: Signal<Settings>) -> Element {
                                     },
                                 }
                             }
-                            div { class: "dlg-field",
-                                label { class: "dlg-field-label", "{s_folder}" }
+                            div { class: "uis-fld-labelled",
+                                label { class: "uis-fld-labelled-label", "{s_folder}" }
                                 div { class: "manager-row",
                                     input {
-                                        class: "input",
+                                        class: "uis-txt",
                                         value: "{d.folder}",
                                         oninput: move |e| {
                                             let v = e.value();
@@ -698,7 +690,7 @@ pub fn DestinationEditor(settings: Signal<Settings>) -> Element {
                                         },
                                     }
                                     button {
-                                        class: "btn",
+                                        class: "uis-btn",
                                         onclick: move |_| {
                                             let id = id_browse.clone();
                                             spawn(async move {
@@ -713,14 +705,14 @@ pub fn DestinationEditor(settings: Signal<Settings>) -> Element {
                                     }
                                 }
                                 if folder_empty {
-                                    p { class: "hint warn", "{s_no_folder}" }
+                                    p { class: "uis-hnt warn", "{s_no_folder}" }
                                 }
-                                p { class: "hint", "{s_relative_hint}" }
+                                p { class: "uis-hnt", "{s_relative_hint}" }
                             }
-                            div { class: "dlg-field",
-                                label { class: "check-label",
+                            div { class: "uis-fld-labelled",
+                                label { class: "uis-chk-lbl",
                                     input {
-                                        class: "check-box",
+                                        class: "uis-chk-box",
                                         r#type: "checkbox",
                                         checked: d.keep_structure,
                                         onchange: move |e| {
@@ -731,10 +723,10 @@ pub fn DestinationEditor(settings: Signal<Settings>) -> Element {
                                     "{s_keep_structure}"
                                 }
                             }
-                            div { class: "dlg-field",
-                                label { class: "dlg-field-label", "{s_pattern}" }
+                            div { class: "uis-fld-labelled",
+                                label { class: "uis-fld-labelled-label", "{s_pattern}" }
                                 input {
-                                    class: "input",
+                                    class: "uis-txt",
                                     value: "{d.pattern}",
                                     oninput: move |e| {
                                         let v = e.value();
@@ -749,7 +741,7 @@ pub fn DestinationEditor(settings: Signal<Settings>) -> Element {
                                             rsx! {
                                                 button {
                                                     key: "{token}",
-                                                    class: "chip",
+                                                    class: "uis-chp",
                                                     onclick: move |_| {
                                                         let next = format!("{base}{{{token}}}");
                                                         edit_destination(settings, &id, |x| x.pattern = next);
@@ -760,16 +752,16 @@ pub fn DestinationEditor(settings: Signal<Settings>) -> Element {
                                         }
                                     }
                                 }
-                                p { class: "hint", "{s_hint}" }
+                                p { class: "uis-hnt", "{s_hint}" }
                             }
-                            div { class: "dlg-field",
-                                label { class: "dlg-field-label", "{s_preview}" }
+                            div { class: "uis-fld-labelled",
+                                label { class: "uis-fld-labelled-label", "{s_preview}" }
                                 div { class: "manager-example", "{example}" }
                             }
                         }
                     }
                 } else {
-                    p { class: "hint", "{s_source_fixed}" }
+                    p { class: "uis-hnt", "{s_source_fixed}" }
                 }
             }
         }
@@ -778,7 +770,7 @@ pub fn DestinationEditor(settings: Signal<Settings>) -> Element {
 
 // ── the advanced section of a preset ────────────────────────────────────────────────────────────
 // Each control is one field of `EncoderOptions`; an empty field means "the encoder decides". Numbers
-// use the catalog's NumberField (themed steppers, clamped on blur) at a width that fits a few digits.
+// use the catalog's UisNum (themed steppers, clamped on blur) at a width that fits a few digits.
 
 /// The width of a number field, in px, from the characters its largest value takes: the digits (13 px
 /// monospace, about 8 px each) plus the field's padding and its stepper column. A field is as wide as
@@ -789,7 +781,7 @@ fn number_width(max: u32) -> u32 {
 
 /// A labelled catalog number field, as wide as its largest value needs.
 #[component]
-fn NumberField(
+fn LclFldNum(
     label: String,
     value: Option<u32>,
     min: u32,
@@ -802,11 +794,11 @@ fn NumberField(
     on_change: EventHandler<Option<u32>>,
 ) -> Element {
     rsx! {
-        div { class: "dlg-field",
-            label { class: "dlg-field-label", "{label}" }
+        div { class: "uis-fld-labelled",
+            label { class: "uis-fld-labelled-label", "{label}" }
             div { class: "manager-row",
                 // The catalog's number field takes any real number; this one is whole and unsigned.
-                NumberInput {
+                UisNum {
                     value: value.map(f64::from),
                     min: Some(f64::from(min)),
                     max: Some(f64::from(max)),
@@ -818,41 +810,6 @@ fn NumberField(
                 }
                 if !unit.is_empty() {
                     span { "{unit}" }
-                }
-            }
-        }
-    }
-}
-
-#[component]
-fn ToggleField(label: String, checked: bool, on_change: EventHandler<bool>) -> Element {
-    rsx! {
-        div { class: "dlg-field",
-            label { class: "check-label",
-                input {
-                    class: "check-box",
-                    r#type: "checkbox",
-                    checked,
-                    onchange: move |e| on_change.call(e.checked()),
-                }
-                "{label}"
-            }
-        }
-    }
-}
-
-/// A choice from a short list; `""` is the first, "automatic" entry when `auto` is given.
-#[component]
-fn ChoiceField(label: String, value: String, options: Vec<(String, String)>, on_change: EventHandler<String>) -> Element {
-    rsx! {
-        div { class: "dlg-field",
-            label { class: "dlg-field-label", "{label}" }
-            select {
-                class: "select",
-                value: "{value}",
-                onchange: move |e| on_change.call(e.value()),
-                for (id, text) in options {
-                    option { key: "{id}", value: "{id}", selected: id == value, "{text}" }
                 }
             }
         }
@@ -886,27 +843,35 @@ fn AdvancedOptions(settings: Signal<Settings>, id: String, lang: String) -> Elem
 
     rsx! {
         details { class: "manager-advanced",
-            summary { class: "dlg-field-label", "{s_adv}" }
+            summary { class: "uis-fld-labelled-label", "{s_adv}" }
             div { class: "manager-advanced-body",
 
             if p.format == Format::Mp3 {
-                ChoiceField {
-                    label: t("lblAdvJointStereo"),
-                    value: bool_choice(o.mp3_joint_stereo).to_owned(),
-                    options: vec![
-                        (String::new(), auto.clone()),
-                        ("1".to_owned(), t("lblAdvYes")),
-                        ("0".to_owned(), t("lblAdvNo")),
-                    ],
-                    on_change: {
-                        let id = id.clone();
-                        move |v: String| {
-                            let j = match v.as_str() { "1" => Some(true), "0" => Some(false), _ => None };
-                            edit(&id, &|p| p.options.mp3_joint_stereo = j);
+                div { class: "uis-fld-labelled",
+                    label { class: "uis-fld-labelled-label", {t("lblAdvJointStereo")} }
+                    select {
+                        class: "uis-ddn-std",
+                        value: bool_choice(o.mp3_joint_stereo).to_owned(),
+                        onchange: {
+                            let cb = {
+                                let id = id.clone();
+                                move |v: String| {
+                                    let j = match v.as_str() { "1" => Some(true), "0" => Some(false), _ => None };
+                                    edit(&id, &|p| p.options.mp3_joint_stereo = j);
+                                }
+                            };
+                            move |e| cb(e.value())
+                        },
+                        for (oid, text) in vec![
+                            (String::new(), auto.clone()),
+                            ("1".to_owned(), t("lblAdvYes")),
+                            ("0".to_owned(), t("lblAdvNo")),
+                        ] {
+                            option { key: "{oid}", value: "{oid}", selected: oid == bool_choice(o.mp3_joint_stereo).to_owned(), "{text}" }
                         }
-                    },
+                    }
                 }
-                NumberField {
+                LclFldNum {
                     label: t("lblAdvAlgorithm"),
                     value: o.mp3_algorithm.map(u32::from),
                     min: 0,
@@ -917,7 +882,7 @@ fn AdvancedOptions(settings: Signal<Settings>, id: String, lang: String) -> Elem
                         move |v: Option<u32>| edit(&id, &|p| p.options.mp3_algorithm = v.map(|x| x.min(9) as u8))
                     },
                 }
-                NumberField {
+                LclFldNum {
                     label: t("lblAdvLowpass"),
                     value: o.mp3_lowpass_hz,
                     min: 1000,
@@ -928,7 +893,7 @@ fn AdvancedOptions(settings: Signal<Settings>, id: String, lang: String) -> Elem
                         move |v| edit(&id, &|p| p.options.mp3_lowpass_hz = v)
                     },
                 }
-                NumberField {
+                LclFldNum {
                     label: t("lblAdvHighpass"),
                     value: o.mp3_highpass_hz,
                     min: 10,
@@ -939,34 +904,61 @@ fn AdvancedOptions(settings: Signal<Settings>, id: String, lang: String) -> Elem
                         move |v| edit(&id, &|p| p.options.mp3_highpass_hz = v)
                     },
                 }
-                ToggleField {
-                    label: t("lblAdvReservoir"),
-                    checked: o.mp3_reservoir,
-                    on_change: {
-                        let id = id.clone();
-                        move |v| edit(&id, &|p| p.options.mp3_reservoir = v)
-                    },
+                div { class: "uis-fld-labelled",
+                    label { class: "uis-chk-lbl",
+                        input {
+                            class: "uis-chk-box",
+                            r#type: "checkbox",
+                            checked: o.mp3_reservoir,
+                            onchange: {
+                                let cb = {
+                                    let id = id.clone();
+                                    move |v| edit(&id, &|p| p.options.mp3_reservoir = v)
+                                };
+                                move |e| cb(e.checked())
+                            },
+                        }
+                        {t("lblAdvReservoir")}
+                    }
                 }
-                ToggleField {
-                    label: t("lblAdvCopyright"),
-                    checked: o.mp3_copyright,
-                    on_change: {
-                        let id = id.clone();
-                        move |v| edit(&id, &|p| p.options.mp3_copyright = v)
-                    },
+                div { class: "uis-fld-labelled",
+                    label { class: "uis-chk-lbl",
+                        input {
+                            class: "uis-chk-box",
+                            r#type: "checkbox",
+                            checked: o.mp3_copyright,
+                            onchange: {
+                                let cb = {
+                                    let id = id.clone();
+                                    move |v| edit(&id, &|p| p.options.mp3_copyright = v)
+                                };
+                                move |e| cb(e.checked())
+                            },
+                        }
+                        {t("lblAdvCopyright")}
+                    }
                 }
-                ToggleField {
-                    label: t("lblAdvOriginal"),
-                    checked: o.mp3_original,
-                    on_change: {
-                        let id = id.clone();
-                        move |v| edit(&id, &|p| p.options.mp3_original = v)
-                    },
+                div { class: "uis-fld-labelled",
+                    label { class: "uis-chk-lbl",
+                        input {
+                            class: "uis-chk-box",
+                            r#type: "checkbox",
+                            checked: o.mp3_original,
+                            onchange: {
+                                let cb = {
+                                    let id = id.clone();
+                                    move |v| edit(&id, &|p| p.options.mp3_original = v)
+                                };
+                                move |e| cb(e.checked())
+                            },
+                        }
+                        {t("lblAdvOriginal")}
+                    }
                 }
             }
 
             if p.format == Format::Ogg && p.rate_control != RateControl::Vbr {
-                NumberField {
+                LclFldNum {
                     label: t("lblAdvOggMin"),
                     value: o.ogg_min_kbps,
                     min: 32,
@@ -977,7 +969,7 @@ fn AdvancedOptions(settings: Signal<Settings>, id: String, lang: String) -> Elem
                         move |v| edit(&id, &|p| p.options.ogg_min_kbps = v)
                     },
                 }
-                NumberField {
+                LclFldNum {
                     label: t("lblAdvOggMax"),
                     value: o.ogg_max_kbps,
                     min: 32,
@@ -991,58 +983,82 @@ fn AdvancedOptions(settings: Signal<Settings>, id: String, lang: String) -> Elem
             }
 
             if p.format == Format::Opus {
-                ChoiceField {
-                    label: t("lblAdvOpusApplication"),
-                    value: o.opus_application.ffmpeg().to_owned(),
-                    options: vec![
-                        ("audio".to_owned(), t("lblAdvOpusMusic")),
-                        ("voip".to_owned(), t("lblAdvOpusVoice")),
-                        ("lowdelay".to_owned(), t("lblAdvOpusLowDelay")),
-                    ],
-                    on_change: {
-                        let id = id.clone();
-                        move |v: String| {
-                            let a = match v.as_str() {
-                                "voip" => OpusApplication::Voip,
-                                "lowdelay" => OpusApplication::LowDelay,
-                                _ => OpusApplication::Audio,
+                div { class: "uis-fld-labelled",
+                    label { class: "uis-fld-labelled-label", {t("lblAdvOpusApplication")} }
+                    select {
+                        class: "uis-ddn-std",
+                        value: o.opus_application.ffmpeg().to_owned(),
+                        onchange: {
+                            let cb = {
+                                let id = id.clone();
+                                move |v: String| {
+                                    let a = match v.as_str() {
+                                        "voip" => OpusApplication::Voip,
+                                        "lowdelay" => OpusApplication::LowDelay,
+                                        _ => OpusApplication::Audio,
+                                    };
+                                    edit(&id, &|p| p.options.opus_application = a);
+                                }
                             };
-                            edit(&id, &|p| p.options.opus_application = a);
+                            move |e| cb(e.value())
+                        },
+                        for (oid, text) in vec![
+                            ("audio".to_owned(), t("lblAdvOpusMusic")),
+                            ("voip".to_owned(), t("lblAdvOpusVoice")),
+                            ("lowdelay".to_owned(), t("lblAdvOpusLowDelay")),
+                        ] {
+                            option { key: "{oid}", value: "{oid}", selected: oid == o.opus_application.ffmpeg().to_owned(), "{text}" }
                         }
-                    },
+                    }
                 }
-                ChoiceField {
-                    label: t("lblAdvOpusVbr"),
-                    value: o.opus_vbr.ffmpeg().to_owned(),
-                    options: vec![
-                        ("on".to_owned(), t("lblAdvOpusVbrOn")),
-                        ("constrained".to_owned(), t("lblAdvOpusVbrConstrained")),
-                        ("off".to_owned(), t("lblAdvOpusVbrOff")),
-                    ],
-                    on_change: {
-                        let id = id.clone();
-                        move |v: String| {
-                            let m = match v.as_str() {
-                                "constrained" => OpusVbr::Constrained,
-                                "off" => OpusVbr::Off,
-                                _ => OpusVbr::On,
+                div { class: "uis-fld-labelled",
+                    label { class: "uis-fld-labelled-label", {t("lblAdvOpusVbr")} }
+                    select {
+                        class: "uis-ddn-std",
+                        value: o.opus_vbr.ffmpeg().to_owned(),
+                        onchange: {
+                            let cb = {
+                                let id = id.clone();
+                                move |v: String| {
+                                    let m = match v.as_str() {
+                                        "constrained" => OpusVbr::Constrained,
+                                        "off" => OpusVbr::Off,
+                                        _ => OpusVbr::On,
+                                    };
+                                    edit(&id, &|p| p.options.opus_vbr = m);
+                                }
                             };
-                            edit(&id, &|p| p.options.opus_vbr = m);
+                            move |e| cb(e.value())
+                        },
+                        for (oid, text) in vec![
+                            ("on".to_owned(), t("lblAdvOpusVbrOn")),
+                            ("constrained".to_owned(), t("lblAdvOpusVbrConstrained")),
+                            ("off".to_owned(), t("lblAdvOpusVbrOff")),
+                        ] {
+                            option { key: "{oid}", value: "{oid}", selected: oid == o.opus_vbr.ffmpeg().to_owned(), "{text}" }
                         }
-                    },
+                    }
                 }
-                ChoiceField {
-                    label: t("lblAdvOpusFrame"),
-                    value: o.opus_frame_tenths.map(|v| v.to_string()).unwrap_or_default(),
-                    options: std::iter::once((String::new(), auto.clone()))
-                        .chain(OPUS_FRAME_TENTHS.iter().map(|t| (t.to_string(), format!("{} ms", f64::from(*t) / 10.0))))
-                        .collect(),
-                    on_change: {
-                        let id = id.clone();
-                        move |v: String| edit(&id, &|p| p.options.opus_frame_tenths = v.parse::<u32>().ok())
-                    },
+                div { class: "uis-fld-labelled",
+                    label { class: "uis-fld-labelled-label", {t("lblAdvOpusFrame")} }
+                    select {
+                        class: "uis-ddn-std",
+                        value: o.opus_frame_tenths.map(|v| v.to_string()).unwrap_or_default(),
+                        onchange: {
+                            let cb = {
+                                let id = id.clone();
+                                move |v: String| edit(&id, &|p| p.options.opus_frame_tenths = v.parse::<u32>().ok())
+                            };
+                            move |e| cb(e.value())
+                        },
+                        for (oid, text) in std::iter::once((String::new(), auto.clone()))
+                            .chain(OPUS_FRAME_TENTHS.iter().map(|t| (t.to_string(), format!("{} ms", f64::from(*t) / 10.0))))
+                            .collect::<Vec<(String, String)>>() {
+                            option { key: "{oid}", value: "{oid}", selected: oid == o.opus_frame_tenths.map(|v| v.to_string()).unwrap_or_default(), "{text}" }
+                        }
+                    }
                 }
-                NumberField {
+                LclFldNum {
                     label: t("lblAdvOpusComplexity"),
                     value: o.opus_complexity.map(u32::from),
                     min: 0,
@@ -1053,60 +1069,93 @@ fn AdvancedOptions(settings: Signal<Settings>, id: String, lang: String) -> Elem
                         move |v: Option<u32>| edit(&id, &|p| p.options.opus_complexity = v.map(|x| x.min(10) as u8))
                     },
                 }
-                ChoiceField {
-                    label: t("lblAdvOpusBandwidth"),
-                    value: o.opus_bandwidth.map(|b| b.id().to_owned()).unwrap_or_default(),
-                    options: vec![
-                        (String::new(), auto.clone()),
-                        ("narrow".to_owned(), t("lblAdvOpusNarrow")),
-                        ("medium".to_owned(), t("lblAdvOpusMedium")),
-                        ("wide".to_owned(), t("lblAdvOpusWide")),
-                        ("superwide".to_owned(), t("lblAdvOpusSuperWide")),
-                        ("full".to_owned(), t("lblAdvOpusFull")),
-                    ],
-                    on_change: {
-                        let id = id.clone();
-                        move |v: String| edit(&id, &|p| p.options.opus_bandwidth = OpusBandwidth::from_id(&v))
-                    },
+                div { class: "uis-fld-labelled",
+                    label { class: "uis-fld-labelled-label", {t("lblAdvOpusBandwidth")} }
+                    select {
+                        class: "uis-ddn-std",
+                        value: o.opus_bandwidth.map(|b| b.id().to_owned()).unwrap_or_default(),
+                        onchange: {
+                            let cb = {
+                                let id = id.clone();
+                                move |v: String| edit(&id, &|p| p.options.opus_bandwidth = OpusBandwidth::from_id(&v))
+                            };
+                            move |e| cb(e.value())
+                        },
+                        for (oid, text) in vec![
+                            (String::new(), auto.clone()),
+                            ("narrow".to_owned(), t("lblAdvOpusNarrow")),
+                            ("medium".to_owned(), t("lblAdvOpusMedium")),
+                            ("wide".to_owned(), t("lblAdvOpusWide")),
+                            ("superwide".to_owned(), t("lblAdvOpusSuperWide")),
+                            ("full".to_owned(), t("lblAdvOpusFull")),
+                        ] {
+                            option { key: "{oid}", value: "{oid}", selected: oid == o.opus_bandwidth.map(|b| b.id().to_owned()).unwrap_or_default(), "{text}" }
+                        }
+                    }
                 }
-                ToggleField {
-                    label: t("lblAdvOpusPhase"),
-                    checked: o.opus_phase_inversion,
-                    on_change: {
-                        let id = id.clone();
-                        move |v| edit(&id, &|p| p.options.opus_phase_inversion = v)
-                    },
+                div { class: "uis-fld-labelled",
+                    label { class: "uis-chk-lbl",
+                        input {
+                            class: "uis-chk-box",
+                            r#type: "checkbox",
+                            checked: o.opus_phase_inversion,
+                            onchange: {
+                                let cb = {
+                                    let id = id.clone();
+                                    move |v| edit(&id, &|p| p.options.opus_phase_inversion = v)
+                                };
+                                move |e| cb(e.checked())
+                            },
+                        }
+                        {t("lblAdvOpusPhase")}
+                    }
                 }
             }
 
             if p.is_flac() {
-                ChoiceField {
-                    label: t("lblAdvFlacBlock"),
-                    value: o.flac_block_size.map(|v| v.to_string()).unwrap_or_default(),
-                    options: std::iter::once((String::new(), auto.clone()))
-                        .chain(FLAC_BLOCK_SIZES.iter().map(|b| (b.to_string(), b.to_string())))
-                        .collect(),
-                    on_change: {
-                        let id = id.clone();
-                        move |v: String| edit(&id, &|p| p.options.flac_block_size = v.parse::<u32>().ok())
-                    },
+                div { class: "uis-fld-labelled",
+                    label { class: "uis-fld-labelled-label", {t("lblAdvFlacBlock")} }
+                    select {
+                        class: "uis-ddn-std",
+                        value: o.flac_block_size.map(|v| v.to_string()).unwrap_or_default(),
+                        onchange: {
+                            let cb = {
+                                let id = id.clone();
+                                move |v: String| edit(&id, &|p| p.options.flac_block_size = v.parse::<u32>().ok())
+                            };
+                            move |e| cb(e.value())
+                        },
+                        for (oid, text) in std::iter::once((String::new(), auto.clone()))
+                            .chain(FLAC_BLOCK_SIZES.iter().map(|b| (b.to_string(), b.to_string())))
+                            .collect::<Vec<(String, String)>>() {
+                            option { key: "{oid}", value: "{oid}", selected: oid == o.flac_block_size.map(|v| v.to_string()).unwrap_or_default(), "{text}" }
+                        }
+                    }
                 }
-                ChoiceField {
-                    label: t("lblAdvFlacStereo"),
-                    value: o.flac_stereo.map(|s| s.id().to_owned()).unwrap_or_default(),
-                    options: vec![
-                        (String::new(), auto.clone()),
-                        ("independent".to_owned(), t("lblAdvFlacIndependent")),
-                        ("leftside".to_owned(), t("lblAdvFlacLeftSide")),
-                        ("rightside".to_owned(), t("lblAdvFlacRightSide")),
-                        ("midside".to_owned(), t("lblAdvFlacMidSide")),
-                    ],
-                    on_change: {
-                        let id = id.clone();
-                        move |v: String| edit(&id, &|p| p.options.flac_stereo = FlacStereo::from_id(&v))
-                    },
+                div { class: "uis-fld-labelled",
+                    label { class: "uis-fld-labelled-label", {t("lblAdvFlacStereo")} }
+                    select {
+                        class: "uis-ddn-std",
+                        value: o.flac_stereo.map(|s| s.id().to_owned()).unwrap_or_default(),
+                        onchange: {
+                            let cb = {
+                                let id = id.clone();
+                                move |v: String| edit(&id, &|p| p.options.flac_stereo = FlacStereo::from_id(&v))
+                            };
+                            move |e| cb(e.value())
+                        },
+                        for (oid, text) in vec![
+                            (String::new(), auto.clone()),
+                            ("independent".to_owned(), t("lblAdvFlacIndependent")),
+                            ("leftside".to_owned(), t("lblAdvFlacLeftSide")),
+                            ("rightside".to_owned(), t("lblAdvFlacRightSide")),
+                            ("midside".to_owned(), t("lblAdvFlacMidSide")),
+                        ] {
+                            option { key: "{oid}", value: "{oid}", selected: oid == o.flac_stereo.map(|s| s.id().to_owned()).unwrap_or_default(), "{text}" }
+                        }
+                    }
                 }
-                NumberField {
+                LclFldNum {
                     label: t("lblAdvFlacLpc"),
                     value: o.flac_max_lpc.map(u32::from),
                     min: 1,
@@ -1117,7 +1166,7 @@ fn AdvancedOptions(settings: Signal<Settings>, id: String, lang: String) -> Elem
                         move |v: Option<u32>| edit(&id, &|p| p.options.flac_max_lpc = v.map(|x| x.min(32) as u8))
                     },
                 }
-                NumberField {
+                LclFldNum {
                     label: t("lblAdvFlacPrecision"),
                     value: o.flac_lpc_precision.map(u32::from),
                     min: 8,
@@ -1128,7 +1177,7 @@ fn AdvancedOptions(settings: Signal<Settings>, id: String, lang: String) -> Elem
                         move |v: Option<u32>| edit(&id, &|p| p.options.flac_lpc_precision = v.map(|x| x.min(15) as u8))
                     },
                 }
-                NumberField {
+                LclFldNum {
                     label: t("lblAdvFlacMinPartition"),
                     value: o.flac_min_partition.map(u32::from),
                     min: 0,
@@ -1139,7 +1188,7 @@ fn AdvancedOptions(settings: Signal<Settings>, id: String, lang: String) -> Elem
                         move |v: Option<u32>| edit(&id, &|p| p.options.flac_min_partition = v.map(|x| x.min(8) as u8))
                     },
                 }
-                NumberField {
+                LclFldNum {
                     label: t("lblAdvFlacMaxPartition"),
                     value: o.flac_max_partition.map(u32::from),
                     min: 0,
@@ -1150,18 +1199,27 @@ fn AdvancedOptions(settings: Signal<Settings>, id: String, lang: String) -> Elem
                         move |v: Option<u32>| edit(&id, &|p| p.options.flac_max_partition = v.map(|x| x.min(8) as u8))
                     },
                 }
-                ToggleField {
-                    label: t("lblAdvFlacExhaustive"),
-                    checked: o.flac_exhaustive,
-                    on_change: {
-                        let id = id.clone();
-                        move |v| edit(&id, &|p| p.options.flac_exhaustive = v)
-                    },
+                div { class: "uis-fld-labelled",
+                    label { class: "uis-chk-lbl",
+                        input {
+                            class: "uis-chk-box",
+                            r#type: "checkbox",
+                            checked: o.flac_exhaustive,
+                            onchange: {
+                                let cb = {
+                                    let id = id.clone();
+                                    move |v| edit(&id, &|p| p.options.flac_exhaustive = v)
+                                };
+                                move |e| cb(e.checked())
+                            },
+                        }
+                        {t("lblAdvFlacExhaustive")}
+                    }
                 }
             }
 
             if p.is_aac() {
-                NumberField {
+                LclFldNum {
                     label: t("lblAdvCutoff"),
                     value: o.aac_cutoff_hz,
                     min: 1000,
@@ -1226,10 +1284,10 @@ pub fn CleanupEditor(settings: Signal<Settings>) -> Element {
 
     rsx! {
         div { class: "manager",
-            div { class: "manager-list",
+            div { class: "manager-list uis-lvw-reorder",
                 div { class: "manager-actions",
                     button {
-                        class: "btn icon",
+                        class: "uis-btn ico",
                         title: "{s_new}",
                         "aria-label": "{s_new}",
                         onclick: move |_| {
@@ -1242,7 +1300,7 @@ pub fn CleanupEditor(settings: Signal<Settings>) -> Element {
                         Icon { width: 14, height: 14, icon: LdPlus }
                     }
                     button {
-                        class: "btn icon",
+                        class: "uis-btn ico",
                         title: "{s_dup}",
                         "aria-label": "{s_dup}",
                         onclick: move |_| {
@@ -1259,7 +1317,7 @@ pub fn CleanupEditor(settings: Signal<Settings>) -> Element {
                         Icon { width: 14, height: 14, icon: LdCopy }
                     }
                     button {
-                        class: "btn icon",
+                        class: "uis-btn ico",
                         title: "{s_del}",
                         "aria-label": "{s_del}",
                         disabled: !can_delete,
@@ -1272,7 +1330,7 @@ pub fn CleanupEditor(settings: Signal<Settings>) -> Element {
                         Icon { width: 14, height: 14, icon: LdTrash2 }
                     }
                 }
-                div { class: "lv-scroll",
+                div { class: "uis-lvw-scroll",
                     for c in listed.iter() {
                         {
                             let id = c.id.clone();
@@ -1284,9 +1342,9 @@ pub fn CleanupEditor(settings: Signal<Settings>) -> Element {
                                 button {
                                     key: "{c.id}",
                                     class: match (active, moving) {
-                                        (_, true) => "lv-item reordering",
-                                        (true, _) => "lv-item active",
-                                        _ => "lv-item",
+                                        (_, true) => "uis-lvw-item reordering",
+                                        (true, _) => "uis-lvw-item active",
+                                        _ => "uis-lvw-item",
                                     },
                                     onpointerdown: move |e| {
                                         if e.trigger_button() == Some(MouseButton::Primary) {
@@ -1306,23 +1364,23 @@ pub fn CleanupEditor(settings: Signal<Settings>) -> Element {
                                         selected.set(id.clone());
                                         settings.write().cleanup_id = id.clone();
                                     },
-                                    div { class: "lv-item-body",
-                                        div { class: "lv-item-name", "{c.name}" }
+                                    div { class: "uis-lvw-item-body",
+                                        div { class: "uis-lvw-item-name", "{c.name}" }
                                     }
                                 }
                             }
                         }
                     }
                 }
-                p { class: "hint", "{s_reorder}" }
+                p { class: "uis-hnt", "{s_reorder}" }
             }
             div { class: "manager-form",
                 if let Some(c) = current {
                   Fragment { key: "{cur_id}",
-                    div { class: "dlg-field",
-                        label { class: "dlg-field-label", "{s_name}" }
+                    div { class: "uis-fld-labelled",
+                        label { class: "uis-fld-labelled-label", "{s_name}" }
                         input {
-                            class: "input",
+                            class: "uis-txt",
                             value: "{c.name}",
                             oninput: move |e| {
                                 let v = e.value();
@@ -1330,10 +1388,10 @@ pub fn CleanupEditor(settings: Signal<Settings>) -> Element {
                             },
                         }
                     }
-                    div { class: "dlg-field",
-                        label { class: "dlg-field-label", "{s_mode}" }
+                    div { class: "uis-fld-labelled",
+                        label { class: "uis-fld-labelled-label", "{s_mode}" }
                         select {
-                            class: "select",
+                            class: "uis-ddn-std",
                             value: if c.mode == CleanupMode::Delete { "delete" } else { "keep" },
                             onchange: move |e| {
                                 let mode = if e.value() == "delete" { CleanupMode::Delete } else { CleanupMode::Keep };
@@ -1344,10 +1402,10 @@ pub fn CleanupEditor(settings: Signal<Settings>) -> Element {
                         }
                     }
                     ExceptionsField { settings, id: cur_id.clone(), lang: lang.clone(), mode: c.mode }
-                    div { class: "dlg-field",
-                        label { class: "check-label",
+                    div { class: "uis-fld-labelled",
+                        label { class: "uis-chk-lbl",
                             input {
-                                class: "check-box",
+                                class: "uis-chk-box",
                                 r#type: "checkbox",
                                 checked: c.remove_cover,
                                 onchange: move |e| {
@@ -1358,10 +1416,10 @@ pub fn CleanupEditor(settings: Signal<Settings>) -> Element {
                             "{s_remove_cover}"
                         }
                     }
-                    div { class: "dlg-field",
-                        label { class: "check-label",
+                    div { class: "uis-fld-labelled",
+                        label { class: "uis-chk-lbl",
                             input {
-                                class: "check-box",
+                                class: "uis-chk-box",
                                 r#type: "checkbox",
                                 checked: c.embed_lrc,
                                 onchange: move |e| {
@@ -1371,12 +1429,12 @@ pub fn CleanupEditor(settings: Signal<Settings>) -> Element {
                             }
                             "{s_embed_lrc}"
                         }
-                        p { class: "hint", "{s_embed_lrc_hint}" }
+                        p { class: "uis-hnt", "{s_embed_lrc_hint}" }
                     }
-                    div { class: "dlg-field",
-                        label { class: "dlg-field-label", "{s_lyrics}" }
+                    div { class: "uis-fld-labelled",
+                        label { class: "uis-fld-labelled-label", "{s_lyrics}" }
                         select {
-                            class: "select",
+                            class: "uis-ddn-std",
                             value: match c.lyrics_mode {
                                 LyricsMode::Auto => "auto",
                                 LyricsMode::Duplicate => "both",
@@ -1397,9 +1455,9 @@ pub fn CleanupEditor(settings: Signal<Settings>) -> Element {
                             option { value: "uslt", selected: c.lyrics_mode == LyricsMode::Uslt, "{s_lyrics_uslt}" }
                             option { value: "sylt", selected: c.lyrics_mode == LyricsMode::Sylt, "{s_lyrics_sylt}" }
                         }
-                        label { class: "check-label",
+                        label { class: "uis-chk-lbl",
                             input {
-                                class: "check-box",
+                                class: "uis-chk-box",
                                 r#type: "checkbox",
                                 checked: c.lyrics_strip_time,
                                 disabled: c.lyrics_mode == LyricsMode::Sylt,
@@ -1410,7 +1468,7 @@ pub fn CleanupEditor(settings: Signal<Settings>) -> Element {
                             }
                             "{s_lyrics_strip}"
                         }
-                        p { class: "hint", "{s_lyrics_hint}" }
+                        p { class: "uis-hnt", "{s_lyrics_hint}" }
                     }
                   }
                 }
@@ -1429,10 +1487,10 @@ pub fn NotifyEditor(settings: Signal<Settings>) -> Element {
     rsx! {
         div { class: "manager",
             div { class: "manager-form",
-                div { class: "dlg-field",
-                    label { class: "check-label",
+                div { class: "uis-fld-labelled",
+                    label { class: "uis-chk-lbl",
                         input {
-                            class: "check-box",
+                            class: "uis-chk-box",
                             r#type: "checkbox",
                             checked: on,
                             onchange: move |e| settings.write().notify = e.checked(),

@@ -5,21 +5,21 @@
 //! a string literal at the call site.
 
 use crate::{
-    catalog::{AppHeader, DropZone},
-    ffmpeg_panel::{FfmpegPopup, Popup, download_note, install, installed_version, is_current},
+    catalog::{UisAppHeader, UisFldLabelled, LbsDropZone},
+    ffmpeg_panel::{FfmpegPopup, Popup, download_note},
     i18n, manager,
-    runner::{DOWNLOAD, LATEST, RUNNER, refresh_ffmpeg},
+    runner::{RUNNER, RunState},
     settings::{RunChoice, Settings},
 };
 use dioxus::prelude::*;
 use dioxus_free_icons::{
     Icon,
-    icons::ld_icons::{LdEraser, LdFilePlus, LdFolder, LdFolderOpen, LdFolderPlus, LdListChecks, LdMusic, LdPlay, LdReplace, LdSlidersHorizontal, LdSparkles, LdSquare, LdX},
+    icons::ld_icons::{LdEraser, LdFilePlus, LdFolder, LdFolderOpen, LdFolderPlus, LdListChecks, LdMusic, LdPlay, LdReplace, LdVolume2, LdSparkles, LdSquare, LdX},
 };
 use engine::{
     JobSpec, JobStatus, Overwrite,
     destination::{PICK_ID, SOURCE_ID},
-    download::{DownloadState, LatestState},
+    download::DownloadState,
 };
 use std::{
     collections::{HashMap, HashSet},
@@ -28,21 +28,21 @@ use std::{
     time::Duration,
 };
 
-static NEXT_ID: AtomicU64 = AtomicU64::new(1);
+pub(crate) static NEXT_ID: AtomicU64 = AtomicU64::new(1);
 
 #[derive(Clone, PartialEq)]
-struct Item {
-    id: u64,
-    name: String,
-    path: PathBuf,
+pub(crate) struct Item {
+    pub(crate) id: u64,
+    pub(crate) name: String,
+    pub(crate) path: PathBuf,
     /// The folder this file was added through; None for a file added on its own.
-    root: Option<PathBuf>,
+    pub(crate) root: Option<PathBuf>,
     /// What this file will be converted with - the panel's choices when it was added or last applied to it.
-    run: RunChoice,
+    pub(crate) run: RunChoice,
 }
 
 /// The rows from `a` to `b` in list order, both included (the order the user sees, whichever end came first).
-fn range_between(ids: &[u64], a: u64, b: u64) -> Vec<u64> {
+pub(crate) fn range_between(ids: &[u64], a: u64, b: u64) -> Vec<u64> {
     let (Some(x), Some(y)) = (ids.iter().position(|i| *i == a), ids.iter().position(|i| *i == b)) else {
         return vec![b];
     };
@@ -51,7 +51,7 @@ fn range_between(ids: &[u64], a: u64, b: u64) -> Vec<u64> {
 
 /// One tag of a row: the control's icon and the name of what was chosen.
 #[derive(Clone, PartialEq)]
-enum TagKind {
+pub(crate) enum TagKind {
     Preset,
     Cleanup,
     Effects,
@@ -60,11 +60,11 @@ enum TagKind {
 }
 
 #[component]
-fn RunTag(kind: TagKind, text: String, title: String) -> Element {
+pub(crate) fn RunTag(kind: TagKind, text: String, title: String) -> Element {
     rsx! {
-        span { class: "chip", title: "{title}",
+        span { class: "uis-chp", title: "{title}",
             match kind {
-                TagKind::Preset => rsx! { Icon { width: 14, height: 14, icon: LdSlidersHorizontal } },
+                TagKind::Preset => rsx! { Icon { width: 14, height: 14, icon: LdVolume2 } },
                 TagKind::Cleanup => rsx! { Icon { width: 14, height: 14, icon: LdEraser } },
                 TagKind::Effects => rsx! { Icon { width: 14, height: 14, icon: LdSparkles } },
                 TagKind::Destination => rsx! { Icon { width: 14, height: 14, icon: LdFolder } },
@@ -76,17 +76,31 @@ fn RunTag(kind: TagKind, text: String, title: String) -> Element {
 }
 
 /// Keeping the format, every tag and the cover, and applying no effect would only re-encode the file.
-fn nothing_to_do(s: &Settings, run: &RunChoice) -> bool {
-    let (c, e) = (s.cleanup_by(&run.cleanup_id), s.effects_by(&run.effects_id));
+pub(crate) fn nothing_to_do(s: &Settings, run: &RunChoice) -> bool {
+    let (c, e) = (s.cleanup_by(&run.cleanup_id), s.effects_of(run));
     s.preset_by(&run.preset_id).is_original() && !c.edits_tags() && !c.remove_cover && e.items.is_empty()
 }
 
-fn percent_text(p: f32) -> String {
+pub(crate) fn percent_text(p: f32) -> String {
     format!("{} %", p.round() as u32)
 }
 
+/// The whole run as one percentage: a finished file counts 100, a running or analysing one its own percent, a waiting one 0.
+pub(crate) fn overall_percent<'a>(statuses: impl Iterator<Item = &'a JobStatus>) -> f32 {
+    let (mut sum, mut n) = (0.0_f32, 0_u32);
+    for s in statuses {
+        n += 1;
+        sum += match s {
+            JobStatus::Running { percent } | JobStatus::Analysing { percent } => *percent,
+            s if !s.is_active() => 100.0,
+            _ => 0.0,
+        };
+    }
+    if n == 0 { 0.0 } else { sum / n as f32 }
+}
+
 /// One operating-system notice for a finished run. A run that was only cancelled says nothing.
-fn notify_finished(snap: &HashMap<u64, JobStatus>, lang: &str) {
+pub(crate) fn notify_finished(snap: &HashMap<u64, JobStatus>, lang: &str) {
     let body = engine::run_summary(snap.values(), lang);
     if body.is_empty() {
         return;
@@ -97,37 +111,28 @@ fn notify_finished(snap: &HashMap<u64, JobStatus>, lang: &str) {
 
 #[component]
 pub fn Converter(
+    /// What the app knows about the runs and ffmpeg.
+    run: RunState,
+    /// True while this view is the one on screen: both stay mounted, the other is only hidden.
+    active: bool,
     settings: Signal<Settings>,
     app_name: String,
     app_version: String,
+    /// The header's first group (work / batch) - the app owns it.
+    header_start: Element,
     /// The header's right-hand group (GitHub, help, settings) - the app owns those.
     header_end: Element,
     on_manage: EventHandler<String>,
     children: Element,
 ) -> Element {
     let mut items = use_signal(Vec::<Item>::new);
-    let mut statuses = use_signal(HashMap::<u64, JobStatus>::new);
     // Cover thumbnails as data URIs. A present key with None means "looked, there is none".
     let mut thumbs = use_signal(HashMap::<u64, Option<String>>::new);
     // The rows the panel's Apply writes to, and the one a Shift+click counts from.
     let mut selected = use_signal(HashSet::<u64>::new);
     let mut anchor = use_signal(|| None::<u64>);
-    // ffmpeg: is one installed, how an install is going, which version is in place.
-    let mut ffmpeg_ready = use_signal(|| RUNNER.ffmpeg().is_some());
-    let mut download = use_signal(|| DownloadState::Idle);
-    let mut installed = use_signal(installed_version);
-    // The popup the user closed (a failure): it stays closed until an install starts again.
-    let mut dismissed = use_signal(|| false);
+    let RunState { statuses, download, ffmpeg_ready, mut dismissed } = run;
     let mut pick_nonce = use_signal(|| 0u32);
-    use_hook(|| {
-        // Which ffmpeg is the compatible one. Asked on every machine: the app cannot keep its ffmpeg right without
-        // the answer, so this is not the optional request the dev-machine switch exists to silence.
-        LATEST.check();
-        // Nothing installed: install it now, there is nothing for the user to decide.
-        if !*ffmpeg_ready.peek() {
-            install();
-        }
-    });
 
     // A few files at a time, off the UI thread, so a folder of hundreds fills in without a stall. The
     // picture is read in-process (no process per file); ffmpeg is only the fallback for what the
@@ -170,83 +175,13 @@ pub fn Converter(
         }
     });
 
-    // The window polls the runner and the install; the engine never calls back into it. Only a CHANGED
-    // snapshot is written, so an idle queue does not re-render the list five times a second.
-    use_future(move || async move {
-        let mut was_active = false;
-        // A newer approved ffmpeg is installed by itself, once per launch (the popup says "Updating").
-        let mut update_tried = false;
-        loop {
-            tokio::time::sleep(Duration::from_millis(200)).await;
-            let snap: HashMap<u64, JobStatus> = RUNNER.snapshot().into_iter().collect();
-            // A run just ended: tell the user, whichever window they are looking at.
-            let active = snap.values().any(JobStatus::is_active);
-            if was_active && !active && settings.peek().notify {
-                notify_finished(&snap, &settings.peek().lang);
-            }
-            was_active = active;
-            if *statuses.peek() != snap {
-                statuses.set(snap);
-            }
-            let dl = DOWNLOAD.snapshot();
-            if dl.is_active() && *dismissed.peek() {
-                dismissed.set(false);
-            }
-            if *download.peek() != dl {
-                if matches!(dl, DownloadState::Done(_)) {
-                    ffmpeg_ready.set(refresh_ffmpeg(&RUNNER));
-                    installed.set(installed_version());
-                }
-                download.set(dl);
-            }
-            if let LatestState::Known(m) = LATEST.snapshot() {
-                if !update_tried
-                    && *ffmpeg_ready.peek()
-                    && !is_current(&m)
-                    && !DOWNLOAD.snapshot().is_active()
-                {
-                    update_tried = true;
-                    install();
-                }
-            }
+    // The window may not be shorter than the layout needs: measured whenever this view comes on screen (both views stay
+    // mounted, and a hidden one has no layout to measure).
+    use_effect(use_reactive!(|active| {
+        if active {
+            spawn(crate::fit_window_height());
         }
-    });
-
-    // The window may not be shorter than the layout needs: the header, the options panel down to its
-    // last row, and the status bar. Measured from the laid-out page - the panel's rows decide it, so a
-    // row added there raises the floor by itself. The first frames may not be laid out yet (fonts,
-    // styles), so it is asked again until the panel has a real height; if it never answers, a fixed
-    // floor stands, so the window is never left without one.
-    use_future(move || async move {
-        let mut height = 0.0;
-        for _ in 0..40 {
-            tokio::time::sleep(Duration::from_millis(250)).await;
-            let mut ev = document::eval(
-                r#"
-                const q = (s) => document.querySelector(s);
-                const panel = q('.converter-panel'), head = q('.barh-header');
-                const rule = q('.barh-gradient'), foot = q('.barh-footer');
-                if (!panel || !head || !foot || !panel.lastElementChild) { dioxus.send(0); }
-                else {
-                    const end = panel.lastElementChild.getBoundingClientRect().bottom;
-                    const pad = parseFloat(getComputedStyle(panel).paddingBottom) || 0;
-                    dioxus.send(head.offsetHeight + (rule ? rule.offsetHeight : 0)
-                        + (end - panel.getBoundingClientRect().top) + pad + foot.offsetHeight);
-                }
-                "#,
-            );
-            if let Ok(h) = ev.recv::<f64>().await {
-                if h > 100.0 {
-                    height = h.ceil();
-                    break;
-                }
-            }
-        }
-        if height == 0.0 {
-            height = crate::MIN_HEIGHT_FALLBACK;
-        }
-        dioxus::desktop::window().set_min_inner_size(Some(dioxus::desktop::LogicalSize::new(crate::MIN_WIDTH, height)));
-    });
+    }));
 
     let lang = settings.read().lang.clone();
     let t = |key: &str| i18n::t(&lang, key);
@@ -318,7 +253,7 @@ pub fn Converter(
                 cleanup: s.cleanup_by(&i.run.cleanup_id),
                 destination: s.destination_by(&i.run.destination_id),
                 overwrite: i.run.overwrite,
-                effects: s.effects_by(&i.run.effects_id),
+                effects: s.effects_of(&i.run),
             })
             .collect();
         drop(st);
@@ -393,7 +328,11 @@ pub fn Converter(
     let s_main_clear = t("btnMainClear");
     let s_main_stop = t("btnMainStop");
     let s_main_convert = t("btnMainConvert");
-    let s_main_preset = t("lblMainPreset");
+    let s_main_preset = t("lblMainAudio");
+    let s_lbl_tags = t("lblWorkTags");
+    let s_lbl_effects = t("lblWorkEffects");
+    let s_lbl_destination = t("lblWorkDestination");
+    let s_lbl_overwrite = t("lblWorkOverwrite");
     let s_main_edit_presets = t("tipMainEditPresets");
     let s_main_destination = t("tipMainDestination");
     let s_main_apply = t("btnMainApply");
@@ -411,7 +350,7 @@ pub fn Converter(
             String::new()
         } else if busy {
             let finished = st.values().filter(|s| !s.is_active()).count();
-            t("msgMainProgress").replace("{done}", &finished.to_string()).replace("{total}", &touched.to_string())
+            format!("{} · {}", t("msgMainProgress").replace("{done}", &finished.to_string()).replace("{total}", &touched.to_string()), percent_text(overall_percent(st.values())))
         } else if touched > 0 {
             engine::run_summary(st.values(), &settings.read().lang)
         } else {
@@ -470,24 +409,25 @@ pub fn Converter(
         // ⚠ CLAUDE: the header holds the file actions only (icon-only, tooltips). The choices that shape a
         // run - preset, tags, effects, where it goes, how many at once, Convert - live in the right-hand
         // panel below, one aligned column. A second bar under the header was removed on request.
-        AppHeader { app_name, app_version,
-            div { class: "barh-grp",
+        UisAppHeader { app_name, app_version,
+            {header_start}
+            div { class: "uis-barh-grp",
                 button {
-                    class: "btn icon",
+                    class: "uis-btn ico",
                     title: "{s_main_add_files}",
                     "aria-label": "{s_main_add_files}",
                     onclick: pick_files,
                     Icon { width: 14, height: 14, icon: LdFilePlus }
                 }
                 button {
-                    class: "btn icon",
+                    class: "uis-btn ico",
                     title: "{s_main_add_folder}",
                     "aria-label": "{s_main_add_folder}",
                     onclick: pick_folder,
                     Icon { width: 14, height: 14, icon: LdFolderPlus }
                 }
                 button {
-                    class: "btn icon",
+                    class: "uis-btn ico",
                     title: "{s_main_clear}",
                     "aria-label": "{s_main_clear}",
                     disabled: !any_idle,
@@ -495,11 +435,11 @@ pub fn Converter(
                     Icon { width: 14, height: 14, icon: crate::icons::LdBrushCleaning }
                 }
             }
-            span { class: "bar-spacer" }
+            span { class: "uis-bar-spacer" }
             {header_end}
         }
-        DropZone {
-            class: "app-main",
+        LbsDropZone {
+            class: "uis-app-main",
             label: drop_label,
             on_files: move |dropped: Vec<(String, String)>| {
                 add_paths(dropped.into_iter().map(|(_, p)| PathBuf::from(p)).collect());
@@ -513,7 +453,7 @@ pub fn Converter(
         // ⚠ CLAUDE: tabindex makes the list the thing a click focuses, which is what lets Ctrl+A reach it;
         // a click on the empty part clears the selection (a row's own click stops here).
         div {
-            class: "lv-scroll converter-list",
+            class: "uis-lvw-scroll converter-list",
             tabindex: "0",
             onclick: move |_| selected.set(HashSet::new()),
             onkeydown: move |e| {
@@ -525,7 +465,7 @@ pub fn Converter(
                 }
             },
             if !have_items {
-                p { class: "workspace-empty", "{list_empty}" }
+                div { class: "work-empty", p { class: "wv-failure", "{list_empty}" } }
             }
             for item in items.read().iter().cloned() {
                 {
@@ -554,7 +494,7 @@ pub fn Converter(
                     if cleanup.edits_tags() || cleanup.remove_cover {
                         tags.push((TagKind::Cleanup, cleanup.name.clone(), s_main_cleanup.clone()));
                     }
-                    let effects = cfg.effects_by(&r.effects_id);
+                    let effects = cfg.effects_of(r);
                     if !effects.items.is_empty() {
                         tags.push((TagKind::Effects, effects.name.clone(), s_main_effects.clone()));
                     }
@@ -566,7 +506,7 @@ pub fn Converter(
                         Overwrite::Overwrite => tags.push((TagKind::Overwrite, s_main_overwrite_overwrite.clone(), s_main_overwrite.clone())),
                         Overwrite::Rename => tags.push((TagKind::Overwrite, s_main_overwrite_rename.clone(), s_main_overwrite.clone())),
                     }
-                    let row_class = if sel_now.contains(&id) { "lv-item converter-row active" } else { "lv-item converter-row" };
+                    let row_class = if sel_now.contains(&id) { "uis-lvw-item converter-row active" } else { "uis-lvw-item converter-row" };
                     rsx! {
                         div {
                             key: "{id}",
@@ -593,16 +533,16 @@ pub fn Converter(
                                     anchor.set(Some(id));
                                 }
                             },
-                            div { class: "lv-item-icon converter-cover-box",
+                            div { class: "uis-lvw-item-icon converter-cover-box",
                                 if let Some(Some(src)) = thumbs.read().get(&id) {
                                     img { class: "converter-cover", src: "{src}", alt: "" }
                                 } else {
                                     Icon { width: 18, height: 18, icon: LdMusic }
                                 }
                             }
-                            div { class: "lv-item-body",
-                                div { class: "lv-item-name", "{item.name}" }
-                                div { class: "lv-item-sub", "{path}" }
+                            div { class: "uis-lvw-item-body",
+                                div { class: "uis-lvw-item-name", "{item.name}" }
+                                div { class: "uis-lvw-item-sub", "{path}" }
                                 div { class: "converter-tags",
                                     for (n, (kind, text, title)) in tags.into_iter().enumerate() {
                                         RunTag { key: "{n}", kind, text, title }
@@ -610,10 +550,10 @@ pub fn Converter(
                                 }
                             }
                             if !badge.is_empty() {
-                                span { class: "lv-item-badge converter-state converter-state-{state}", title: "{detail}", "{badge}" }
+                                span { class: "uis-lvw-item-badge converter-state converter-state-{state}", title: "{detail}", "{badge}" }
                             }
                             button {
-                                class: "btn icon subtle",
+                                class: "uis-btn ico subtle",
                                 title: "{tip}",
                                 "aria-label": "{tip}",
                                 onclick: move |e| {
@@ -636,10 +576,10 @@ pub fn Converter(
         }
         // The run's choices, one column, every row the same width: a select with the button that edits
         // what it picks, welded the way the header's groups are. Tooltips name them (no labels).
-        aside { class: "pnl converter-panel",
-            div { class: "barh-grp",
+        aside { class: "uis-pnl converter-panel work-panel uis-cmp-panel uis-cmp-side",
+            UisFldLabelled { compact: true, label: s_main_preset.clone(), title: s_main_preset.clone(),
                 select {
-                    class: "select",
+                    class: "uis-ddn-std",
                     title: "{s_main_preset}",
                     "aria-label": "{s_main_preset}",
                     value: "{preset_id}",
@@ -649,16 +589,16 @@ pub fn Converter(
                     }
                 }
                 button {
-                    class: "btn icon",
+                    class: "uis-btn ico",
                     title: "{s_main_edit_presets}",
                     "aria-label": "{s_main_edit_presets}",
                     onclick: move |_| on_manage.call(manager::PRESETS.to_owned()),
-                    Icon { width: 14, height: 14, icon: LdSlidersHorizontal }
+                    Icon { width: 14, height: 14, icon: LdVolume2 }
                 }
             }
-            div { class: "barh-grp",
+            UisFldLabelled { compact: true, label: s_lbl_tags.clone(), title: s_main_cleanup.clone(),
                 select {
-                    class: "select",
+                    class: "uis-ddn-std",
                     title: "{s_main_cleanup}",
                     "aria-label": "{s_main_cleanup}",
                     value: "{cleanup_id}",
@@ -668,16 +608,16 @@ pub fn Converter(
                     }
                 }
                 button {
-                    class: "btn icon",
+                    class: "uis-btn ico",
                     title: "{s_main_edit_cleanups}",
                     "aria-label": "{s_main_edit_cleanups}",
                     onclick: move |_| on_manage.call(manager::CLEANUPS.to_owned()),
                     Icon { width: 14, height: 14, icon: LdEraser }
                 }
             }
-            div { class: "barh-grp",
+            UisFldLabelled { compact: true, label: s_lbl_effects.clone(), title: s_main_effects.clone(),
                 select {
-                    class: "select",
+                    class: "uis-ddn-std",
                     title: "{s_main_effects}",
                     "aria-label": "{s_main_effects}",
                     value: "{effects_id}",
@@ -687,16 +627,16 @@ pub fn Converter(
                     }
                 }
                 button {
-                    class: "btn icon",
+                    class: "uis-btn ico",
                     title: "{s_main_edit_effects}",
                     "aria-label": "{s_main_edit_effects}",
                     onclick: move |_| on_manage.call(manager::EFFECTS.to_owned()),
                     Icon { width: 14, height: 14, icon: LdSparkles }
                 }
             }
-            div { class: "barh-grp",
+            UisFldLabelled { compact: true, label: s_lbl_destination.clone(), title: s_main_destination.clone(),
                 select {
-                    class: "select",
+                    class: "uis-ddn-std",
                     title: "{s_main_destination}",
                     "aria-label": "{s_main_destination}",
                     // A new key rebuilds the box after the folder picker closes: cancelled, it must not go on
@@ -727,16 +667,16 @@ pub fn Converter(
                     option { value: "{PICK_ID}", "{pick_label}" }
                 }
                 button {
-                    class: "btn icon",
+                    class: "uis-btn ico",
                     title: "{s_main_edit_destinations}",
                     "aria-label": "{s_main_edit_destinations}",
                     onclick: move |_| on_manage.call(manager::DESTINATIONS.to_owned()),
                     Icon { width: 14, height: 14, icon: LdFolder }
                 }
             }
-            div { class: "barh-grp",
+            UisFldLabelled { compact: true, label: s_lbl_overwrite.clone(), title: s_main_overwrite.clone(),
                 select {
-                    class: "select",
+                    class: "uis-ddn-std",
                     title: "{s_main_overwrite}",
                     "aria-label": "{s_main_overwrite}",
                     value: match overwrite { Overwrite::Skip => "skip", Overwrite::Overwrite => "overwrite", Overwrite::Rename => "rename" },
@@ -755,7 +695,7 @@ pub fn Converter(
             // ⚠ CLAUDE: the panel is a brush. It never shows a row's choices and selecting rows never changes
             // it; Apply writes ALL of it onto the selected rows, and is off when none can take it.
             button {
-                class: "btn converter-panel-apply",
+                class: "uis-btn converter-panel-apply",
                 title: "{s_main_apply_tip}",
                 "aria-label": "{s_main_apply_tip}",
                 disabled: !can_apply,
@@ -763,10 +703,10 @@ pub fn Converter(
                 Icon { width: 14, height: 14, icon: LdListChecks }
                 " {s_main_apply}"
             }
-            div { class: "converter-panel-run",
-                div { class: "barh-grp",
+            div { class: "converter-panel-run uis-cmp-run",
+                div { class: "uis-barh-grp",
                     select {
-                        class: "select",
+                        class: "uis-ddn-std",
                         title: "{s_main_parallel}",
                         "aria-label": "{s_main_parallel}",
                         value: "{parallel}",
@@ -781,7 +721,7 @@ pub fn Converter(
                     }
                     if busy {
                         button {
-                            class: "btn icon",
+                            class: "uis-btn ico",
                             title: "{s_main_stop}",
                             "aria-label": "{s_main_stop}",
                             onclick: stop,
@@ -789,7 +729,7 @@ pub fn Converter(
                         }
                     }
                     button {
-                        class: "btn icon",
+                        class: "uis-btn ico",
                         title: "{s_main_convert}",
                         "aria-label": "{s_main_convert}",
                         disabled: ffmpeg_missing || !have_items || busy || nothing_to_do,
@@ -798,7 +738,7 @@ pub fn Converter(
                     }
                 }
                 button {
-                    class: "btn icon",
+                    class: "uis-btn ico",
                     title: "{s_main_open_output}",
                     "aria-label": "{s_main_open_output}",
                     disabled: open_target.is_none(),
@@ -813,7 +753,7 @@ pub fn Converter(
         }
         }
         }
-        div { class: "barh-footer",
+        div { class: "uis-barh-footer",
             span { class: "converter-status", "{status_text}" }
         }
     }
