@@ -23,6 +23,8 @@
   <span>&nbsp;·&nbsp;</span>
   <a href="#install">Install</a>
   <span>&nbsp;·&nbsp;</span>
+  <a href="#effects">Effects</a>
+  <span>&nbsp;·&nbsp;</span>
   <a href="#what-it-is">Features</a>
   <span>&nbsp;·&nbsp;</span>
   <a href="#documentation">Documentation</a>
@@ -76,18 +78,33 @@
 
 ## What it is
 
-FFmpeg Audio Studio turns audio files into another format, in the spirit of fre:ac and MediaHuman: you drop files or folders on the window, pick what the output should be, and convert. Several files run at once, each with its own progress, and a run can be cancelled per file.
+FFmpeg Audio Studio is a graphical studio on top of ffmpeg, with two views, chosen by the first two buttons of the header:
 
-What sets it apart is that three choices are made separately, each from its own drop-down in the header: the **preset** (what the output is), the **tags** setting (which tags and cover are kept) and the **effects** setting (what is done to the sound). One preset can be used with a setting that strips the comments, with another that normalises the volume, or with neither.
+- **The work view (the studio)** opens first. One file at a time: its waveform, real playback with your effects applied, a cut set with two buttons, fades you drag, and drawers for the channels, the equaliser, the compressor and the level. You hear what the conversion will make before you make it.
+- **The batch view** converts many files at once, in the spirit of fre:ac and MediaHuman: drop files or folders, pick what the output should be, and convert. Several files run at once, each with its own progress and its own settings, and a run can be cancelled per file.
+
+In both views the choices are kept separate: the **preset** (what the output is), the **tags** setting (which tags and cover are kept) and the **effects** (what is done to the sound). One preset can be used with a setting that strips the comments, with another that normalises the volume, or with neither. ffmpeg is not hidden: a panel shows the exact command that will run, and a button copies it.
+
+---
+
+## Effects
+
+Effects are what is done to the sound, and they are the heart of the studio. They are called **Audio Effects** and work in both views.
+
+- **Standard effects as switches.** The work view lists the effects most people need as rows you switch on and off while the sound plays: trim silence, keep a range, limit the length, channels, equaliser, compressor, the four ways to set the volume (a fixed gain, a loudness, a peak or ReplayGain), fades, silence at the end and ReplayGain tags. Some have a drawer of their own, drawn as a graph: the equaliser, the compressor and the channels.
+- **Every ffmpeg audio filter, on top.** The **Add an effect** menu offers all of ffmpeg's audio filters, grouped by category and searchable by name, each with ordinary controls generated from the filter itself: times such as 1:30, a picker for colours and files, and a button that puts a value back to its default. Which effects the work view lists ready to switch on is your choice in Settings.
+- **You set the order.** Effects run from the top of the list to the bottom as one ffmpeg filter chain; drag a card to change the result. A line warns when an effect counts on something a later one changes, and the app never reorders your list.
+- **Saved lists for the batch.** In the batch view an effects entry is a named list kept in Settings and chosen from a drop-down, so one entry goes with any preset.
 
 ---
 
 ## Features
 
+- **A work view and a batch view** - hear a file with its effects on a waveform, cut it and fade it; or convert a whole folder at once.
 - **Eighteen output formats** - MP3, AAC, ALAC, FLAC, WAV, AIFF, Ogg Vorbis, Opus, WMA, WavPack, TTA, MP2, AC-3, Wave64, AU, FLAC in Ogg, iPhone ringtone (M4R) and raw AAC. Anything ffmpeg can decode goes in.
 - **Tags that survive the trip** - a field keeps its meaning from format to format under the name a tag editor shows (album artist, sort names, composer, BPM, lyrics, ISRC, custom fields), with repeated fields, track and disc totals and the whole date kept, and the cover picture carried to every format that can hold one.
 - **Tag cleaning as a setting** - keep everything except a list, or delete everything except a list, with wildcards; the cover has its own switch.
-- **An effects chain** - trim silence, keep a range, limit the length, channels, repair, low cut, noise reduction, de-esser, ten-band equaliser, bass and treble, dynamics, tempo, volume (loudness, peak, ReplayGain or fixed gain), fades, silence at the end, and ReplayGain tags with album gain.
+- **Audio Effects** - the standard effects as switches, every ffmpeg audio filter in a menu, in an order you choose (see above), with ReplayGain tags and album gain.
 - **Presets with the encoder's own switches** - one quality setting per format, plus MP3, Vorbis, Opus, FLAC and AAC options, optional dither at 16 bit, and an (Original) choice that keeps each file's own format.
 - **Where the files go** - a folder and a file-name pattern (`{artist}/{album}/{track} - {title}`), with the source's folder structure kept, and skip, overwrite or keep-both when a file exists.
 - **A command line** - `yac` ships beside the app and uses the same saved presets, tag settings, effects and destinations: `yac -p "MP3 320 kbps" -d Export Music/`. `yac --list` shows what can be named.
