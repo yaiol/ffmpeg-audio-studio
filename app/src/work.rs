@@ -286,7 +286,6 @@ pub fn Work(
     /// The header's first group (work / batch) - the app owns it.
     header_start: Element,
     /// The header's right-hand group (GitHub, help, settings) - the app owns those.
-    header_end: Element,
     on_manage: EventHandler<String>,
     children: Element,
 ) -> Element {
@@ -559,7 +558,7 @@ pub fn Work(
         // ⚠ CLAUDE: the header holds the file actions only (icon-only, tooltips). The choices that shape a
         // run - preset, tags, effects, where it goes, how many at once, Convert - live in the right-hand panel below,
         // one aligned column.
-        UisAppHeader { app_name, app_version,
+        UisAppHeader { app_name, app_version, bare: true,
             {header_start}
             div { class: "uis-barh-grp",
                 button {
@@ -570,8 +569,6 @@ pub fn Work(
                     Icon { width: 14, height: 14, icon: LdFilePlus }
                 }
             }
-            span { class: "uis-bar-spacer" }
-            {header_end}
         }
         LbsDropZone {
             class: "uis-app-main",

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.1 — 2026-11-13
+
+- The window has its own title bar in place of the system's: the app icon, then Settings, Help and GitHub, the name and version in the middle, and minimize, maximize and close at the end
+- Settings, Help and GitHub moved from the header of each view to the title bar; the header keeps the view switch and the file actions
+- On Windows the title bar takes the system's title-bar colour while the window is active, and a right-click on it (or a click on its icon) opens the system's window menu
+- The window buttons have tooltips in all 52 languages
+- The ffmpeg manifest is read from https://apps.yaiol.com/data/ffmpeg.json
+- Update the README and its screenshot
+
 ## 2.0.0 — 2026-11-06
 
 - The app is renamed FFmpeg Audio Studio (it was Audio Converter); the installer, the Start menu entry and the settings folder carry the new name
