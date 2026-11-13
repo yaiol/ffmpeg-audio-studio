@@ -33,7 +33,7 @@ pub use cbo_filter::{UisCboCategory, UisCboFilter};
 pub use bar_window::UisBarWindow;
 pub use header::UisAppHeader;
 pub use icons::UisIcoGithub;
-pub use news_loader::UisNewsLoader;
+pub use news_loader::{UisBtnNews, UisBtnUpdate, UisNewsLoader};
 pub use num::UisNum;
 pub use stg_view::{UisAppTab, UisStgView};
 pub use equalizer::{EqView, UisEqualizer};

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.2 — 2026-11-13
+
+- When a newer version is out, a button stays in the title bar after GitHub, also after the new-version card was closed or hidden with "Don't show again"; a click reopens the card
+- A News button appears in the title bar while yaiol has an announcement for the app; it reopens the announcements, the hidden ones included
+- Unticking "Don't show again" on a reopened card makes it open at launch again
+- A file named when the app is started (another program opening a file in it) is added to the Studio's list
+- The volume slider and the effect sliders share one look
+- The Settings tooltip reads "Settings", and the About line and the package description say what the app is in one sentence
+
 ## 2.0.1 — 2026-11-13
 
 - The window has its own title bar in place of the system's: the app icon, then Settings, Help and GitHub, the name and version in the middle, and minimize, maximize and close at the end

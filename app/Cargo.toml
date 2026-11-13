@@ -1,8 +1,8 @@
 [package]
 name = "ffmpeg-audio-studio"
-version = "2.0.1"
+version = "2.0.2"
 edition = "2024"
-description = "FFmpeg Audio Studio"
+description = "A Studio to cut and shape one track and hear each effect, and a Batch to convert many files at once. ffmpeg is the engine."
 license = "MIT"
 
 # Identity that is not a standard Cargo field. build.rs turns it into compile-time constants, so

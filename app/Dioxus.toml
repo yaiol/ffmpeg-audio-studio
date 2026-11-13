@@ -8,7 +8,7 @@ out_dir = "../release"
 identifier = "com.yaiol.ffmpeg-audio-studio.app"
 publisher = "yaiol"
 icon = ["assets/app.png", "assets/app.ico", "assets/app.icns"]
-short_description = "FFmpeg Audio Studio"
+short_description = "A Studio to cut and shape one track and hear each effect, and a Batch to convert many files at once. ffmpeg is the engine."
 # The command line (yac) is built by scripts/build-cli.sh and lands here, beside the window. dx skips a listed
 # resource that is not there (with a warning). ffmpeg is NOT a resource: the app installs it itself, into the
 # folder every yaiol app shares.

@@ -602,7 +602,7 @@ pub fn PreviewPane(state: Signal<State>, mut pos: Signal<f64>, visible: bool, on
                         }
                     }
                     input {
-                        class: "wv-volume",
+                        class: "uis-sld wv-volume",
                         r#type: "range",
                         min: "0",
                         max: "100",

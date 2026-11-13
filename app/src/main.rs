@@ -28,7 +28,7 @@ mod work_channels;
 mod work_compressor;
 mod work_level;
 
-use catalog::{UisBarWindow, UisAppTab, UisIcoGithub, UisNewsLoader, UisStgView, news};
+use catalog::{UisBarWindow, UisAppTab, UisIcoGithub, UisBtnNews, UisBtnUpdate, UisNewsLoader, UisStgView, news};
 use converter::Converter;
 use runner::RunState;
 use work::Work;
@@ -42,12 +42,13 @@ use effects_editor::EffectsEditor;
 use effects_favourites::EffectsFavourites;
 use manager::{CleanupEditor, DestinationEditor, NotifyEditor, PresetEditor};
 
-const CSS: [&str; 7] = [
+const CSS: [&str; 8] = [
     include_str!("../assets/uis-colors.css"),
     include_str!("../assets/uis-app.css"),
     include_str!("../assets/uis-bar-window.css"),
     include_str!("../assets/uis-listview.css"),
     include_str!("../assets/uis-fld-labelled.css"),
+    include_str!("../assets/uis-sld.css"),
     include_str!("../assets/app.css"),
     include_str!("../assets/effects_form.css"),
 ];
@@ -480,6 +481,10 @@ fn App() -> Element {
                     },
                     UisIcoGithub {}
                 }
+                // A newer version is out: the reminder, drawn only then; a click reopens the update card.
+                UisBtnUpdate { lang: lang.clone() }
+                // yaiol has news for this app: the second reminder, drawn only then; a click reopens the announcements.
+                UisBtnNews { lang: lang.clone() }
             }
             // ⚠ CLAUDE: BOTH views stay mounted and the other one is only hidden, so nothing either of them holds (the
             // list, the selection, the preview's place and volume) is ever dropped. The Settings page is given to the
