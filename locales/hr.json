@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Dodaj mapu",
   "btnMainClear": "Očisti popis",
   "btnMainApply": "Primijeni",
-  "btnMainConvert": "Pretvori",
   "btnMainStop": "Zaustavi",
   "lblMainOverwriteSkip": "Preskoči",
   "lblMainOverwriteOverwrite": "Prepiši",
@@ -80,7 +79,11 @@
   "msgMainSelected": "Odabrano: {n}",
   "tipMainApply": "Primijeni ove odabire na odabrane datoteke",
   "msgMainProgress": "{done} od {total} datoteka obrađeno",
-  "tipMainOpenOutput": "Otvorite izlaznu mapu",
+  "tipMainShowFile": "Prikaži datoteku u njezinoj mapi",
+  "tipMainStop": "Zaustavi",
+  "tipMainPrevious": "Prethodna datoteka",
+  "tipMainNext": "Sljedeća datoteka",
+  "tipMainPlayerClose": "Zatvori reproduktor",
   "tipMainCleanup": "Oznake",
   "msgMngReorderHint": "Povucite stavku za promjenu redoslijeda. Isti redoslijed koristi se u popisima prozora.",
   "lblPrsRateAbr": "Prosječno (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Mjerenje zvuka...",
   "lblWorkCommand": "ffmpeg naredba",
   "lblWorkSkipped": "Izostavljeno iz zvuka:",
-  "btnWorkCommandCopy": "Kopiraj",
   "tipWorkCommandCopy": "Kopiraj naredbu u međuspremnik",
   "msgWorkCommandNone": "Odaberite datoteku da biste vidjeli naredbu koju će ffmpeg pokrenuti za nju",
   "lblStgLog": "Datoteka zapisnika",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Uvijek na popisu: aplikacija je izgrađena oko toga",
   "msgFxFavouritesFailed": "Popis se nije mogao zadržati: {reason}",
   "lblMainAudio": "Zvuk",
-  "tabStgAudio": "Zvuk"
+  "tabStgAudio": "Zvuk",
+  "btnMainEncode": "Kodiraj",
+  "btnWorkCommandCopy": "Kopiraj"
 }

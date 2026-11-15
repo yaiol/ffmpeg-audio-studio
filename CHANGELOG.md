@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.3 — 2026-11-15
+
+- The button that starts the run is now a highlighted text button, Encode, in both views; the play icon is kept for playing a finished file
+- A converted row shows two buttons in place of the "Done" badge: play and show the file in its folder
+- Play opens a player inside the app, never a program of the system: it has previous and next file, stop, and close, and goes on to the next converted file when one ends; the work view shows it in the preview's place until it is closed
+- The preview bar uses one icon set: a bracket is the cut (set start, go to start, go to end, set end, clear the cut) and a bar is the file
+- The number of conversions at once is a one-character drop-down
+- The two panels no longer draw over each other when the window is narrow: what does not fit is clipped
+- The waveform follows a window resize smoothly instead of lagging with dark zones
+
 ## 2.0.2 — 2026-11-13
 
 - When a newer version is out, a button stays in the title bar after GitHub, also after the new-version card was closed or hidden with "Don't show again"; a click reopens the card

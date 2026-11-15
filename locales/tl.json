@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Magdagdag ng folder",
   "btnMainClear": "I-clear ang listahan",
   "btnMainApply": "Ilapat",
-  "btnMainConvert": "I-convert",
   "btnMainStop": "Itigil",
   "lblMainOverwriteSkip": "Laktawan",
   "lblMainOverwriteOverwrite": "Patungan",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} napili",
   "tipMainApply": "Ilapat ang mga pagpipiliang ito sa mga napiling file",
   "msgMainProgress": "{done} sa {total} file ang naproseso",
-  "tipMainOpenOutput": "Buksan ang output folder",
+  "tipMainShowFile": "Ipakita ang file sa folder nito",
+  "tipMainStop": "Itigil",
+  "tipMainPrevious": "Nakaraang file",
+  "tipMainNext": "Susunod na file",
+  "tipMainPlayerClose": "Isara ang player",
   "tipMainCleanup": "Mga Tag",
   "msgMngReorderHint": "I-drag ang isang entry upang baguhin ang pagkakasunod-sunod. Ang parehong pagkakasunod-sunod ay ginagamit sa mga listahan ng window.",
   "lblPrsRateAbr": "Average (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Sinusukat ang tunog...",
   "lblWorkCommand": "ffmpeg command",
   "lblWorkSkipped": "Iniwan sa labas ng tunog:",
-  "btnWorkCommandCopy": "Kopyahin",
   "tipWorkCommandCopy": "Kopyahin ang command sa clipboard",
   "msgWorkCommandNone": "Pumili ng file para makita ang command na tatakbuhin ng ffmpeg para dito",
   "lblStgLog": "Log file",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Laging nakalista: ang app ay binuo sa paligid nito",
   "msgFxFavouritesFailed": "Hindi mapanatili ang listahan: {reason}",
   "lblMainAudio": "Audio",
-  "tabStgAudio": "Audio"
+  "tabStgAudio": "Audio",
+  "btnMainEncode": "I-encode",
+  "btnWorkCommandCopy": "Kopyahin"
 }

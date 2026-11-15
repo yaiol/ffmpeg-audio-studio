@@ -17,7 +17,6 @@
   "btnMainAddFolder": "ఫోల్డర్‌ను జోడించు",
   "btnMainClear": "జాబితాను క్లియర్ చేయండి",
   "btnMainApply": "వర్తింపజేయి",
-  "btnMainConvert": "మార్చు",
   "btnMainStop": "ఆపు",
   "lblMainOverwriteSkip": "దాటవేయి",
   "lblMainOverwriteOverwrite": "భర్తీ చేయి",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} ఎంపిక చేయబడ్డాయి",
   "tipMainApply": "ఎంచుకున్న ఫైల్‌లకు ఈ ఎంపికలను వర్తింపజేయి",
   "msgMainProgress": "{total} ఫైళ్లలో {done} ప్రాసెస్ చేయబడ్డాయి",
-  "tipMainOpenOutput": "అవుట్‌పుట్ ఫోల్డర్‌ను తెరవండి",
+  "tipMainShowFile": "ఫైల్‌ను దాని ఫోల్డర్‌లో చూపించు",
+  "tipMainStop": "ఆపు",
+  "tipMainPrevious": "మునుపటి ఫైల్",
+  "tipMainNext": "తదుపరి ఫైల్",
+  "tipMainPlayerClose": "ప్లేయర్‌ను మూసివేయండి",
   "tipMainCleanup": "ట్యాగ్‌లు",
   "msgMngReorderHint": "క్రమాన్ని మార్చడానికి ఒక ఎంట్రీని లాగండి. విండో జాబితాలలో అదే క్రమం ఉపయోగించబడుతుంది.",
   "lblPrsRateAbr": "సగటు (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "శబ్దాన్ని కొలుస్తోంది...",
   "lblWorkCommand": "ffmpeg కమాండ్",
   "lblWorkSkipped": "శబ్దం నుండి వదిలివేయబడింది:",
-  "btnWorkCommandCopy": "కాపీ చేయి",
   "tipWorkCommandCopy": "కమాండ్‌ను క్లిప్‌బోర్డ్‌కు కాపీ చేయి",
   "msgWorkCommandNone": "ffmpeg దాని కోసం అమలు చేసే కమాండ్‌ను చూడటానికి ఒక ఫైల్‌ను ఎంచుకోండి",
   "lblStgLog": "లాగ్ ఫైల్",
@@ -243,5 +245,7 @@
   "tipFxLocked": "ఎల్లప్పుడూ జాబితా చేయబడింది: యాప్ దాని చుట్టూ నిర్మించబడింది",
   "msgFxFavouritesFailed": "జాబితాను ఉంచలేకపోయాము: {reason}",
   "lblMainAudio": "ఆడియో",
-  "tabStgAudio": "ఆడియో"
+  "tabStgAudio": "ఆడియో",
+  "btnMainEncode": "ఎన్‌కోడ్ చేయి",
+  "btnWorkCommandCopy": "కాపీ చేయి"
 }

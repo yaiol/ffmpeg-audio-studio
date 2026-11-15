@@ -17,6 +17,7 @@ pub mod measured;
 pub mod lyrics;
 pub mod mapping;
 pub mod options;
+pub mod player;
 pub mod preset;
 pub mod preview;
 pub mod queue;

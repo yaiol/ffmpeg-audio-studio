@@ -17,7 +17,6 @@
   "btnMainAddFolder": "הוסף תיקייה",
   "btnMainClear": "נקה את הרשימה",
   "btnMainApply": "החל",
-  "btnMainConvert": "המר",
   "btnMainStop": "עצור",
   "lblMainOverwriteSkip": "דלג",
   "lblMainOverwriteOverwrite": "דרוס",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} נבחרו",
   "tipMainApply": "החל אפשרויות אלו על הקבצים הנבחרים",
   "msgMainProgress": "{done} מתוך {total} קבצים עובדו",
-  "tipMainOpenOutput": "פתח את תיקיית הפלט",
+  "tipMainShowFile": "הצג את הקובץ בתיקייה שלו",
+  "tipMainStop": "עצור",
+  "tipMainPrevious": "קובץ קודם",
+  "tipMainNext": "קובץ הבא",
+  "tipMainPlayerClose": "סגור את הנגן",
   "tipMainCleanup": "תגיות",
   "msgMngReorderHint": "גרור פריט כדי לשנות את הסדר. אותו סדר משמש ברשימות החלון.",
   "lblPrsRateAbr": "ממוצע (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "מודד את הצליל...",
   "lblWorkCommand": "פקודת ffmpeg",
   "lblWorkSkipped": "הושמט מהצליל:",
-  "btnWorkCommandCopy": "העתק",
   "tipWorkCommandCopy": "העתק את הפקודה ללוח",
   "msgWorkCommandNone": "בחר קובץ כדי לראות את הפקודה ש-ffmpeg יריץ עבורו",
   "lblStgLog": "קובץ יומן",
@@ -243,5 +245,7 @@
   "tipFxLocked": "תמיד ברשימה: האפליקציה בנויה סביבו",
   "msgFxFavouritesFailed": "הרשימה לא נשמרה: {reason}",
   "lblMainAudio": "שמע",
-  "tabStgAudio": "שמע"
+  "tabStgAudio": "שמע",
+  "btnMainEncode": "קודד",
+  "btnWorkCommandCopy": "העתק"
 }

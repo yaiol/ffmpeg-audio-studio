@@ -11,10 +11,11 @@ use crate::{
     runner::{RUNNER, RunState},
     settings::{RunChoice, Settings},
 };
+use crate::player::{Player, PlayerPane, Track};
 use dioxus::prelude::*;
 use dioxus_free_icons::{
     Icon,
-    icons::ld_icons::{LdEraser, LdFilePlus, LdFolder, LdFolderOpen, LdFolderPlus, LdListChecks, LdMusic, LdPlay, LdReplace, LdVolume2, LdSparkles, LdSquare, LdX},
+    icons::ld_icons::{LdEraser, LdFilePlus, LdFolder, LdFolderSearch, LdPause, LdFolderPlus, LdListChecks, LdMusic, LdPlay, LdReplace, LdVolume2, LdSparkles, LdSquare, LdX},
 };
 use engine::{
     JobSpec, JobStatus, Overwrite,
@@ -109,33 +110,11 @@ pub(crate) fn notify_finished(snap: &HashMap<u64, JobStatus>, lang: &str) {
     std::thread::spawn(move || crate::notify::show(&title, &body));
 }
 
-#[component]
-pub fn Converter(
-    /// What the app knows about the runs and ffmpeg.
-    run: RunState,
-    /// True while this view is the one on screen: both stay mounted, the other is only hidden.
-    active: bool,
-    settings: Signal<Settings>,
-    app_name: String,
-    app_version: String,
-    /// The header's first group (work / batch) - the app owns it.
-    header_start: Element,
-    /// The header's right-hand group (GitHub, help, settings) - the app owns those.
-    on_manage: EventHandler<String>,
-    children: Element,
-) -> Element {
-    let mut items = use_signal(Vec::<Item>::new);
-    // Cover thumbnails as data URIs. A present key with None means "looked, there is none".
+/// The covers of the rows, as data addresses, by row id. A present key with None means "looked, there is none". Both views of the app
+/// (batch and work) draw their rows from it: a few files at a time, off the UI thread, so a folder of hundreds fills in without a stall.
+/// The picture is read in-process (no process per file); ffmpeg is only the fallback for what the tag library cannot read.
+pub(crate) fn use_cover_thumbs(items: Signal<Vec<Item>>) -> Signal<HashMap<u64, Option<String>>> {
     let mut thumbs = use_signal(HashMap::<u64, Option<String>>::new);
-    // The rows the panel's Apply writes to, and the one a Shift+click counts from.
-    let mut selected = use_signal(HashSet::<u64>::new);
-    let mut anchor = use_signal(|| None::<u64>);
-    let RunState { statuses, download, ffmpeg_ready, mut dismissed } = run;
-    let mut pick_nonce = use_signal(|| 0u32);
-
-    // A few files at a time, off the UI thread, so a folder of hundreds fills in without a stall. The
-    // picture is read in-process (no process per file); ffmpeg is only the fallback for what the
-    // tag library cannot read.
     use_future(move || async move {
         const AT_ONCE: usize = 4;
         loop {
@@ -173,6 +152,32 @@ pub fn Converter(
             thumbs.write().extend(finished);
         }
     });
+    thumbs
+}
+
+#[component]
+pub fn Converter(
+    /// What the app knows about the runs and ffmpeg.
+    run: RunState,
+    /// True while this view is the one on screen: both stay mounted, the other is only hidden.
+    active: bool,
+    settings: Signal<Settings>,
+    app_name: String,
+    app_version: String,
+    /// The header's first group (work / batch) - the app owns it.
+    header_start: Element,
+    /// The header's right-hand group (GitHub, help, settings) - the app owns those.
+    on_manage: EventHandler<String>,
+    children: Element,
+) -> Element {
+    let mut items = use_signal(Vec::<Item>::new);
+    // The rows the panel's Apply writes to, and the one a Shift+click counts from.
+    let mut selected = use_signal(HashSet::<u64>::new);
+    let mut anchor = use_signal(|| None::<u64>);
+    let RunState { statuses, download, ffmpeg_ready, mut dismissed } = run;
+    let mut pick_nonce = use_signal(|| 0u32);
+
+    let thumbs = use_cover_thumbs(items);
 
     // The window may not be shorter than the layout needs: measured whenever this view comes on screen (both views stay
     // mounted, and a hidden one has no layout to measure).
@@ -184,6 +189,7 @@ pub fn Converter(
 
     let lang = settings.read().lang.clone();
     let t = |key: &str| i18n::t(&lang, key);
+    let player = Player::new();
 
     let mut add_paths = move |paths: Vec<PathBuf>| {
         // Added files take the panel's choices as they are now, and become the selection.
@@ -310,14 +316,19 @@ pub fn Converter(
     let effects_id = s.effects_id.clone();
     let preset_id = s.preset_id.clone();
     let destination_id = s.destination_id.clone();
-    // Where "open the output folder" goes: the folder of the newest finished file - which is right
-    // for the built-in "same folder" too - and otherwise the saved destination's own folder.
-    let saved_folder = s
-        .destinations
-        .iter()
-        .find(|d| d.id == destination_id)
-        .map(|d| PathBuf::from(d.folder.trim()))
-        .filter(|p| !p.as_os_str().is_empty());
+    // The converted files in list order: what the player steps through.
+    let queue: Vec<Track> = {
+        let st = statuses.read();
+        items
+            .read()
+            .iter()
+            .filter_map(|i| match st.get(&i.id) {
+                Some(JobStatus::Done { output }) => Some(Track::of(output)),
+                _ => None,
+            })
+            .collect()
+    };
+
     let parallel = s.parallel;
     let overwrite = s.overwrite;
     drop(s);
@@ -326,7 +337,7 @@ pub fn Converter(
     let s_main_add_folder = t("btnMainAddFolder");
     let s_main_clear = t("btnMainClear");
     let s_main_stop = t("btnMainStop");
-    let s_main_convert = t("btnMainConvert");
+    let s_main_encode = t("btnMainEncode");
     let s_main_preset = t("lblMainAudio");
     let s_lbl_tags = t("lblWorkTags");
     let s_lbl_effects = t("lblWorkEffects");
@@ -367,18 +378,6 @@ pub fn Converter(
     let s_main_edit_cleanups = t("tipMainEditCleanups");
     let s_main_effects = t("tipMainEffects");
     let s_main_edit_effects = t("tipMainEditEffects");
-    let s_main_open_output = t("tipMainOpenOutput");
-    let open_target: Option<PathBuf> = statuses
-        .read()
-        .iter()
-        .filter_map(|(id, s)| match s {
-            JobStatus::Done { output } => Some((*id, output.clone())),
-            _ => None,
-        })
-        .max_by_key(|(id, _)| *id)
-        .and_then(|(_, out)| out.parent().map(Path::to_path_buf))
-        .or(saved_folder)
-        .filter(|p| p.is_dir());
     let s_main_overwrite = t("tipMainOverwrite");
     let s_main_overwrite_skip = t("lblMainOverwriteSkip");
     let s_main_overwrite_overwrite = t("lblMainOverwriteOverwrite");
@@ -447,6 +446,7 @@ pub fn Converter(
         if let Some(popup) = popup {
             FfmpegPopup { lang: lang.clone(), popup, on_close: move |_| dismissed.set(true) }
         }
+        PlayerPane { player, queue, lang: lang.clone(), away: !active }
         // ⚠ CLAUDE: tabindex makes the list the thing a click focuses, which is what lets Ctrl+A reach it;
         // a click on the empty part clears the selection (a row's own click stops here).
         div {
@@ -479,6 +479,13 @@ pub fn Converter(
                         Some(JobStatus::Cancelled) => (t("msgMainStatusCancelled"), String::new(), "idle"),
                         Some(JobStatus::Failed { reason }) => (t("msgMainStatusFailed"), reason.clone(), "err"),
                     };
+                    // A finished row shows two buttons in the place of its badge: play the file in the player, show it in its folder.
+                    let done_file = match &status {
+                        Some(JobStatus::Done { output }) => Some(output.clone()),
+                        _ => None,
+                    };
+                    let sounding = done_file.as_ref().is_some_and(|f| player.is_sounding(f));
+                    let (s_play, s_show) = (if sounding { t("tipWorkPause") } else { t("tipWorkPlay") }, t("tipMainShowFile"));
                     let id = item.id;
                     let path = item.path.display().to_string();
                     let tip = if active { t("tipMainCancel") } else { t("tipMainRemove") };
@@ -546,7 +553,35 @@ pub fn Converter(
                                     }
                                 }
                             }
-                            if !badge.is_empty() {
+                            if let Some(file) = done_file {
+                                button {
+                                    class: "uis-btn ico subtle",
+                                    title: "{s_play}",
+                                    "aria-label": "{s_play}",
+                                    onclick: {
+                                        let track = Track::of(&file);
+                                        move |e: MouseEvent| {
+                                            e.stop_propagation();
+                                            player.play(track.clone());
+                                        }
+                                    },
+                                    if sounding {
+                                        Icon { width: 14, height: 14, icon: LdPause }
+                                    } else {
+                                        Icon { width: 14, height: 14, icon: LdPlay }
+                                    }
+                                }
+                                button {
+                                    class: "uis-btn ico subtle",
+                                    title: "{s_show}",
+                                    "aria-label": "{s_show}",
+                                    onclick: move |e: MouseEvent| {
+                                        e.stop_propagation();
+                                        show_in_folder(&file);
+                                    },
+                                    Icon { width: 14, height: 14, icon: LdFolderSearch }
+                                }
+                            } else if !badge.is_empty() {
                                 span { class: "uis-lvw-item-badge converter-state converter-state-{state}", title: "{detail}", "{badge}" }
                             }
                             button {
@@ -703,7 +738,7 @@ pub fn Converter(
             div { class: "converter-panel-run uis-cmp-run",
                 div { class: "uis-barh-grp",
                     select {
-                        class: "uis-ddn-std",
+                        class: "uis-ddn-std digit",
                         title: "{s_main_parallel}",
                         "aria-label": "{s_main_parallel}",
                         value: "{parallel}",
@@ -726,25 +761,11 @@ pub fn Converter(
                         }
                     }
                     button {
-                        class: "uis-btn ico",
-                        title: "{s_main_convert}",
-                        "aria-label": "{s_main_convert}",
+                        class: "uis-btn primary",
                         disabled: ffmpeg_missing || !have_items || busy || nothing_to_do,
                         onclick: convert,
-                        Icon { width: 14, height: 14, icon: LdPlay }
+                        "{s_main_encode}"
                     }
-                }
-                button {
-                    class: "uis-btn ico",
-                    title: "{s_main_open_output}",
-                    "aria-label": "{s_main_open_output}",
-                    disabled: open_target.is_none(),
-                    onclick: move |_| {
-                        if let Some(p) = &open_target {
-                            let _ = open::that(p);
-                        }
-                    },
-                    Icon { width: 14, height: 14, icon: LdFolderOpen }
                 }
             }
         }
@@ -767,5 +788,20 @@ mod tests {
         assert_eq!(range_between(&ids, 13, 11), vec![11, 12, 13]);
         assert_eq!(range_between(&ids, 12, 12), vec![12]);
         assert_eq!(range_between(&ids, 99, 12), vec![12], "an anchor no longer in the list selects just the clicked row");
+    }
+}
+
+/// Open the file manager with the finished file selected (its folder where the platform cannot select).
+pub(crate) fn show_in_folder(file: &Path) {
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        let arg = format!("/select,\"{}\"", file.display());
+        if std::process::Command::new("explorer").raw_arg(arg).spawn().is_ok() {
+            return;
+        }
+    }
+    if let Some(dir) = file.parent() {
+        let _ = open::that(dir);
     }
 }

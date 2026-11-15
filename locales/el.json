@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Προσθήκη φακέλου",
   "btnMainClear": "Εκκαθάριση λίστας",
   "btnMainApply": "Εφαρμογή",
-  "btnMainConvert": "Μετατροπή",
   "btnMainStop": "Διακοπή",
   "lblMainOverwriteSkip": "Παράλειψη",
   "lblMainOverwriteOverwrite": "Αντικατάσταση",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} επιλεγμένα",
   "tipMainApply": "Εφαρμόστε αυτές τις επιλογές στα επιλεγμένα αρχεία",
   "msgMainProgress": "{done} από {total} αρχεία επεξεργάστηκαν",
-  "tipMainOpenOutput": "Ανοίξτε τον φάκελο εξόδου",
+  "tipMainShowFile": "Εμφάνιση του αρχείου στον φάκελό του",
+  "tipMainStop": "Διακοπή",
+  "tipMainPrevious": "Προηγούμενο αρχείο",
+  "tipMainNext": "Επόμενο αρχείο",
+  "tipMainPlayerClose": "Κλείσιμο της συσκευής αναπαραγωγής",
   "tipMainCleanup": "Ετικέτες",
   "msgMngReorderHint": "Σύρετε μια καταχώριση για να αλλάξετε τη σειρά. Η ίδια σειρά χρησιμοποιείται στις λίστες του παραθύρου.",
   "lblPrsRateAbr": "Μέσος όρος (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Μέτρηση του ήχου...",
   "lblWorkCommand": "Εντολή ffmpeg",
   "lblWorkSkipped": "Παραλείφθηκε από τον ήχο:",
-  "btnWorkCommandCopy": "Αντιγραφή",
   "tipWorkCommandCopy": "Αντιγράψτε την εντολή στο πρόχειρο",
   "msgWorkCommandNone": "Επιλέξτε ένα αρχείο για να δείτε την εντολή που θα εκτελέσει το ffmpeg για αυτό",
   "lblStgLog": "Αρχείο καταγραφής",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Πάντα στη λίστα: η εφαρμογή είναι χτισμένη γύρω από αυτό",
   "msgFxFavouritesFailed": "Η λίστα δεν μπόρεσε να διατηρηθεί: {reason}",
   "lblMainAudio": "Ήχος",
-  "tabStgAudio": "Ήχος"
+  "tabStgAudio": "Ήχος",
+  "btnMainEncode": "Κωδικοποίηση",
+  "btnWorkCommandCopy": "Αντιγραφή"
 }

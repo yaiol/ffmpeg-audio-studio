@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Ṣafikun folda",
   "btnMainClear": "Pa akojọ rẹ",
   "btnMainApply": "Firanṣẹ",
-  "btnMainConvert": "Yipada",
   "btnMainStop": "Duro",
   "lblMainOverwriteSkip": "Fo kọja",
   "lblMainOverwriteOverwrite": "Kọ sori",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} ti yan",
   "tipMainApply": "Fi awọn aṣayan wọnyi si awọn faili ti o yan",
   "msgMainProgress": "{done} ninu {total} faili ti ṣe ilana",
-  "tipMainOpenOutput": "Ṣi folda ìjáde",
+  "tipMainShowFile": "Fi faili han ninu folda rẹ",
+  "tipMainStop": "Duro",
+  "tipMainPrevious": "Faili ti tẹlẹ",
+  "tipMainNext": "Faili ti o tẹle",
+  "tipMainPlayerClose": "Pa ẹrọ orin",
   "tipMainCleanup": "Awọn aami",
   "msgMngReorderHint": "Fa ìwọlé kan láti yí ìtòlẹ́sẹẹsẹ padà. Ìtòlẹ́sẹẹsẹ kan náà ni a lò nínú àwọn àtòjọ ojú-ìwé náà.",
   "lblPrsRateAbr": "Apapọ (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Nṣe iwọn ohun...",
   "lblWorkCommand": "aṣẹ ffmpeg",
   "lblWorkSkipped": "Fi silẹ kuro ninu ohun:",
-  "btnWorkCommandCopy": "Daakọ",
   "tipWorkCommandCopy": "Daakọ aṣẹ si agekuru",
   "msgWorkCommandNone": "Yan faili kan lati wo aṣẹ ti ffmpeg yoo ṣiṣe fun",
   "lblStgLog": "Fáìlì àkọsílẹ̀",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Nigbagbogbo akojọ: a kọ ohun elo naa ni ayika rẹ",
   "msgFxFavouritesFailed": "A ko le tọju atokọ naa: {reason}",
   "lblMainAudio": "Ohùn",
-  "tabStgAudio": "Ohùn"
+  "tabStgAudio": "Ohùn",
+  "btnMainEncode": "Koodu",
+  "btnWorkCommandCopy": "Daakọ"
 }

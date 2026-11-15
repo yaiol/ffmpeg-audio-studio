@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Ordner hinzufügen",
   "btnMainClear": "Liste leeren",
   "btnMainApply": "Anwenden",
-  "btnMainConvert": "Konvertieren",
   "btnMainStop": "Stoppen",
   "lblMainOverwriteSkip": "Überspringen",
   "lblMainOverwriteOverwrite": "Überschreiben",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} ausgewählt",
   "tipMainApply": "Diese Auswahl auf die ausgewählten Dateien anwenden",
   "msgMainProgress": "{done} von {total} Dateien verarbeitet",
-  "tipMainOpenOutput": "Ausgabeordner öffnen",
+  "tipMainShowFile": "Datei im Ordner anzeigen",
+  "tipMainStop": "Stoppen",
+  "tipMainPrevious": "Vorherige Datei",
+  "tipMainNext": "Nächste Datei",
+  "tipMainPlayerClose": "Player schließen",
   "tipMainCleanup": "Tags",
   "msgMngReorderHint": "Ziehen Sie einen Eintrag, um die Reihenfolge zu ändern. Dieselbe Reihenfolge wird in den Listen des Fensters verwendet.",
   "lblPrsRateAbr": "Durchschnitt (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Ton wird gemessen...",
   "lblWorkCommand": "ffmpeg-Befehl",
   "lblWorkSkipped": "Aus dem Ton ausgelassen:",
-  "btnWorkCommandCopy": "Kopieren",
   "tipWorkCommandCopy": "Befehl in die Zwischenablage kopieren",
   "msgWorkCommandNone": "Wählen Sie eine Datei aus, um den ffmpeg-Befehl dafür anzuzeigen",
   "lblStgLog": "Protokolldatei",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Immer gelistet: Die App ist darauf aufgebaut",
   "msgFxFavouritesFailed": "Die Liste konnte nicht gespeichert werden: {reason}",
   "lblMainAudio": "Audio",
-  "tabStgAudio": "Audio"
+  "tabStgAudio": "Audio",
+  "btnMainEncode": "Kodieren",
+  "btnWorkCommandCopy": "Kopieren"
 }

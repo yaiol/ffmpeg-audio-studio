@@ -17,7 +17,6 @@
   "btnMainAddFolder": "فولڈر شامل کریں",
   "btnMainClear": "فہرست صاف کریں",
   "btnMainApply": "لاگو کریں",
-  "btnMainConvert": "تبدیل کریں",
   "btnMainStop": "روکیں",
   "lblMainOverwriteSkip": "چھوڑ دیں",
   "lblMainOverwriteOverwrite": "اوور رائٹ کریں",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} منتخب",
   "tipMainApply": "ان انتخاب کو منتخب فائلوں پر لاگو کریں",
   "msgMainProgress": "{total} میں سے {done} فائلیں پروسیس ہو چکی ہیں",
-  "tipMainOpenOutput": "آؤٹ پٹ فولڈر کھولیں",
+  "tipMainShowFile": "فائل کو اس کے فولڈر میں دکھائیں",
+  "tipMainStop": "روکیں",
+  "tipMainPrevious": "پچھلی فائل",
+  "tipMainNext": "اگلی فائل",
+  "tipMainPlayerClose": "پلیئر بند کریں",
   "tipMainCleanup": "ٹیگز",
   "msgMngReorderHint": "ترتیب بدلنے کے لیے ایک اندراج کو گھسیٹیں۔ ونڈو کی فہرستوں میں بھی یہی ترتیب استعمال ہوتی ہے۔",
   "lblPrsRateAbr": "اوسط (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "آواز کی پیمائش کی جا رہی ہے...",
   "lblWorkCommand": "ffmpeg کمانڈ",
   "lblWorkSkipped": "آواز سے باہر رکھا گیا:",
-  "btnWorkCommandCopy": "کاپی کریں",
   "tipWorkCommandCopy": "کمانڈ کو کلپ بورڈ پر کاپی کریں",
   "msgWorkCommandNone": "کمانڈ دیکھنے کے لیے ایک فائل منتخب کریں جو ffmpeg اس کے لیے چلائے گا",
   "lblStgLog": "لاگ فائل",
@@ -243,5 +245,7 @@
   "tipFxLocked": "ہمیشہ درج: ایپ اس کے گرد بنائی گئی ہے",
   "msgFxFavouritesFailed": "فہرست کو برقرار نہیں رکھا جا سکا: {reason}",
   "lblMainAudio": "آڈیو",
-  "tabStgAudio": "آڈیو"
+  "tabStgAudio": "آڈیو",
+  "btnMainEncode": "انکوڈ کریں",
+  "btnWorkCommandCopy": "کاپی کریں"
 }

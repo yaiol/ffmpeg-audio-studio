@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Pridėti aplanką",
   "btnMainClear": "Išvalyti sąrašą",
   "btnMainApply": "Taikyti",
-  "btnMainConvert": "Konvertuoti",
   "btnMainStop": "Stabdyti",
   "lblMainOverwriteSkip": "Praleisti",
   "lblMainOverwriteOverwrite": "Perrašyti",
@@ -80,7 +79,11 @@
   "msgMainSelected": "Pasirinkta: {n}",
   "tipMainApply": "Taikyti šiuos pasirinkimus pasirinktiems failams",
   "msgMainProgress": "{done} iš {total} failų apdorota",
-  "tipMainOpenOutput": "Atidaryti išvesties aplanką",
+  "tipMainShowFile": "Rodyti failą jo aplanke",
+  "tipMainStop": "Stabdyti",
+  "tipMainPrevious": "Ankstesnis failas",
+  "tipMainNext": "Kitas failas",
+  "tipMainPlayerClose": "Uždaryti grotuvą",
   "tipMainCleanup": "Žymės",
   "msgMngReorderHint": "Vilkite įrašą, kad pakeistumėte tvarką. Ta pati tvarka naudojama lango sąrašuose.",
   "lblPrsRateAbr": "Vidutinis (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Matuojamas garsas...",
   "lblWorkCommand": "ffmpeg komanda",
   "lblWorkSkipped": "Palikta už garso ribų:",
-  "btnWorkCommandCopy": "Kopijuoti",
   "tipWorkCommandCopy": "Nukopijuoti komandą į iškarpinę",
   "msgWorkCommandNone": "Pasirinkite failą, kad pamatytumėte komandą, kurią ffmpeg jam paleis",
   "lblStgLog": "Žurnalo failas",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Visada sąraše: programa sukurta aplink jį",
   "msgFxFavouritesFailed": "Sąrašo nepavyko išsaugoti: {reason}",
   "lblMainAudio": "Garsas",
-  "tabStgAudio": "Garsas"
+  "tabStgAudio": "Garsas",
+  "btnMainEncode": "Koduoti",
+  "btnWorkCommandCopy": "Kopijuoti"
 }

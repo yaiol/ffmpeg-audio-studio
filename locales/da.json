@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Tilføj mappe",
   "btnMainClear": "Ryd listen",
   "btnMainApply": "Anvend",
-  "btnMainConvert": "Konverter",
   "btnMainStop": "Stop",
   "lblMainOverwriteSkip": "Spring over",
   "lblMainOverwriteOverwrite": "Overskriv",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} valgt",
   "tipMainApply": "Anvend disse valg på de valgte filer",
   "msgMainProgress": "{done} af {total} filer behandlet",
-  "tipMainOpenOutput": "Åbn outputmappen",
+  "tipMainShowFile": "Vis filen i dens mappe",
+  "tipMainStop": "Stop",
+  "tipMainPrevious": "Forrige fil",
+  "tipMainNext": "Næste fil",
+  "tipMainPlayerClose": "Luk afspilleren",
   "tipMainCleanup": "Tags",
   "msgMngReorderHint": "Træk et element for at ændre rækkefølgen. Den samme rækkefølge bruges i vinduets lister.",
   "lblPrsRateAbr": "Gennemsnit (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Måler lyden...",
   "lblWorkCommand": "ffmpeg kommando",
   "lblWorkSkipped": "Udeladt fra lyden:",
-  "btnWorkCommandCopy": "Kopiér",
   "tipWorkCommandCopy": "Kopiér kommandoen til udklipsholderen",
   "msgWorkCommandNone": "Vælg en fil for at se den kommando, ffmpeg vil køre for den",
   "lblStgLog": "Logfil",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Altid på listen: appen er bygget op omkring det",
   "msgFxFavouritesFailed": "Listen kunne ikke bevares: {reason}",
   "lblMainAudio": "Lyd",
-  "tabStgAudio": "Lyd"
+  "tabStgAudio": "Lyd",
+  "btnMainEncode": "Kod",
+  "btnWorkCommandCopy": "Kopiér"
 }

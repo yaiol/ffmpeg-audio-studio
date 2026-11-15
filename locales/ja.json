@@ -17,7 +17,6 @@
   "btnMainAddFolder": "フォルダーを追加",
   "btnMainClear": "リストをクリア",
   "btnMainApply": "適用",
-  "btnMainConvert": "変換",
   "btnMainStop": "停止",
   "lblMainOverwriteSkip": "スキップ",
   "lblMainOverwriteOverwrite": "上書き",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n}個選択済み",
   "tipMainApply": "これらの選択を、選択したファイルに適用します",
   "msgMainProgress": "{total} ファイル中 {done} 処理済み",
-  "tipMainOpenOutput": "出力フォルダーを開く",
+  "tipMainShowFile": "ファイルをフォルダーで表示",
+  "tipMainStop": "停止",
+  "tipMainPrevious": "前のファイル",
+  "tipMainNext": "次のファイル",
+  "tipMainPlayerClose": "プレーヤーを閉じる",
   "tipMainCleanup": "タグ",
   "msgMngReorderHint": "項目をドラッグして順序を変更します。同じ順序がウィンドウのリストで使用されます。",
   "lblPrsRateAbr": "平均 (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "音を測定中...",
   "lblWorkCommand": "ffmpeg コマンド",
   "lblWorkSkipped": "音から除外されました:",
-  "btnWorkCommandCopy": "コピー",
   "tipWorkCommandCopy": "コマンドをクリップボードにコピー",
   "msgWorkCommandNone": "コマンドを表示するにはファイルを選択してください。ffmpeg がそのファイルに対して実行します",
   "lblStgLog": "ログファイル",
@@ -243,5 +245,7 @@
   "tipFxLocked": "常に表示されます: アプリケーションはこれを中心に構築されています",
   "msgFxFavouritesFailed": "リストを保持できませんでした: {reason}",
   "lblMainAudio": "オーディオ",
-  "tabStgAudio": "オーディオ"
+  "tabStgAudio": "オーディオ",
+  "btnMainEncode": "エンコード",
+  "btnWorkCommandCopy": "コピー"
 }

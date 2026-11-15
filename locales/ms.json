@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Tambah folder",
   "btnMainClear": "Kosongkan senarai",
   "btnMainApply": "Guna",
-  "btnMainConvert": "Tukar",
   "btnMainStop": "Henti",
   "lblMainOverwriteSkip": "Langkau",
   "lblMainOverwriteOverwrite": "Tulis ganti",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} dipilih",
   "tipMainApply": "Guna pilihan ini pada fail yang dipilih",
   "msgMainProgress": "{done} daripada {total} fail diproses",
-  "tipMainOpenOutput": "Buka folder output",
+  "tipMainShowFile": "Tunjukkan fail dalam foldernya",
+  "tipMainStop": "Henti",
+  "tipMainPrevious": "Fail sebelumnya",
+  "tipMainNext": "Fail seterusnya",
+  "tipMainPlayerClose": "Tutup pemain",
   "tipMainCleanup": "Tag",
   "msgMngReorderHint": "Seret entri untuk menukar susunan. Susunan yang sama digunakan dalam senarai tetingkap.",
   "lblPrsRateAbr": "Purata (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Mengukur bunyi...",
   "lblWorkCommand": "Perintah ffmpeg",
   "lblWorkSkipped": "Ditinggalkan daripada bunyi:",
-  "btnWorkCommandCopy": "Salin",
   "tipWorkCommandCopy": "Salin perintah ke papan keratan",
   "msgWorkCommandNone": "Pilih fail untuk melihat perintah yang akan dijalankan ffmpeg untuknya",
   "lblStgLog": "Fail log",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Sentiasa disenaraikan: aplikasi dibina di sekelilingnya",
   "msgFxFavouritesFailed": "Senarai tidak dapat disimpan: {reason}",
   "lblMainAudio": "Audio",
-  "tabStgAudio": "Audio"
+  "tabStgAudio": "Audio",
+  "btnMainEncode": "Enkod",
+  "btnWorkCommandCopy": "Salin"
 }

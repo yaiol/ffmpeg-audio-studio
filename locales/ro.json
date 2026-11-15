@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Adaugă folder",
   "btnMainClear": "Golește lista",
   "btnMainApply": "Aplică",
-  "btnMainConvert": "Convertește",
   "btnMainStop": "Oprește",
   "lblMainOverwriteSkip": "Omite",
   "lblMainOverwriteOverwrite": "Suprascrie",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} selectate",
   "tipMainApply": "Aplică aceste opțiuni fișierelor selectate",
   "msgMainProgress": "{done} din {total} fișiere procesate",
-  "tipMainOpenOutput": "Deschideți folderul de ieșire",
+  "tipMainShowFile": "Afișează fișierul în folderul său",
+  "tipMainStop": "Oprește",
+  "tipMainPrevious": "Fișier anterior",
+  "tipMainNext": "Fișier următor",
+  "tipMainPlayerClose": "Închide playerul",
   "tipMainCleanup": "Etichete",
   "msgMngReorderHint": "Trageți o intrare pentru a schimba ordinea. Aceeași ordine este utilizată în listele ferestrei.",
   "lblPrsRateAbr": "Medie (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Măsurarea sunetului...",
   "lblWorkCommand": "Comandă ffmpeg",
   "lblWorkSkipped": "Lăsat în afara sunetului:",
-  "btnWorkCommandCopy": "Copiază",
   "tipWorkCommandCopy": "Copiază comanda în clipboard",
   "msgWorkCommandNone": "Selectează un fișier pentru a vedea comanda pe care ffmpeg o va rula pentru el",
   "lblStgLog": "Fișier jurnal",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Întotdeauna listat: aplicația este construită în jurul său",
   "msgFxFavouritesFailed": "Lista nu a putut fi păstrată: {reason}",
   "lblMainAudio": "Audio",
-  "tabStgAudio": "Audio"
+  "tabStgAudio": "Audio",
+  "btnMainEncode": "Codifică",
+  "btnWorkCommandCopy": "Copiază"
 }

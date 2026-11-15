@@ -17,7 +17,6 @@
   "btnMainAddFolder": "เพิ่มโฟลเดอร์",
   "btnMainClear": "ล้างรายการ",
   "btnMainApply": "ใช้",
-  "btnMainConvert": "แปลง",
   "btnMainStop": "หยุด",
   "lblMainOverwriteSkip": "ข้าม",
   "lblMainOverwriteOverwrite": "เขียนทับ",
@@ -80,7 +79,11 @@
   "msgMainSelected": "เลือก {n} รายการ",
   "tipMainApply": "ใช้ตัวเลือกเหล่านี้กับไฟล์ที่เลือก",
   "msgMainProgress": "ประมวลผลแล้ว {done} จาก {total} ไฟล์",
-  "tipMainOpenOutput": "เปิดโฟลเดอร์เอาต์พุต",
+  "tipMainShowFile": "แสดงไฟล์ในโฟลเดอร์",
+  "tipMainStop": "หยุด",
+  "tipMainPrevious": "ไฟล์ก่อนหน้า",
+  "tipMainNext": "ไฟล์ถัดไป",
+  "tipMainPlayerClose": "ปิดโปรแกรมเล่น",
   "tipMainCleanup": "แท็ก",
   "msgMngReorderHint": "ลากรายการเพื่อเปลี่ยนลำดับ ลำดับเดียวกันนี้จะใช้ในรายการของหน้าต่าง",
   "lblPrsRateAbr": "เฉลี่ย (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "กำลังวัดเสียง...",
   "lblWorkCommand": "คำสั่ง ffmpeg",
   "lblWorkSkipped": "ถูกละเว้นจากเสียง:",
-  "btnWorkCommandCopy": "คัดลอก",
   "tipWorkCommandCopy": "คัดลอกคำสั่งไปยังคลิปบอร์ด",
   "msgWorkCommandNone": "เลือกไฟล์เพื่อดูคำสั่งที่ ffmpeg จะรันให้",
   "lblStgLog": "ไฟล์บันทึก",
@@ -243,5 +245,7 @@
   "tipFxLocked": "แสดงอยู่เสมอ: แอปสร้างขึ้นโดยมีสิ่งนี้เป็นหลัก",
   "msgFxFavouritesFailed": "ไม่สามารถเก็บรายการไว้ได้: {reason}",
   "lblMainAudio": "เสียง",
-  "tabStgAudio": "เสียง"
+  "tabStgAudio": "เสียง",
+  "btnMainEncode": "เข้ารหัส",
+  "btnWorkCommandCopy": "คัดลอก"
 }

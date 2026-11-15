@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Thêm thư mục",
   "btnMainClear": "Xóa danh sách",
   "btnMainApply": "Áp dụng",
-  "btnMainConvert": "Chuyển đổi",
   "btnMainStop": "Dừng",
   "lblMainOverwriteSkip": "Bỏ qua",
   "lblMainOverwriteOverwrite": "Ghi đè",
@@ -80,7 +79,11 @@
   "msgMainSelected": "Đã chọn {n}",
   "tipMainApply": "Áp dụng các lựa chọn này cho các tệp đã chọn",
   "msgMainProgress": "Đã xử lý {done} trên {total} tệp",
-  "tipMainOpenOutput": "Mở thư mục đầu ra",
+  "tipMainShowFile": "Hiển thị tệp trong thư mục của nó",
+  "tipMainStop": "Dừng",
+  "tipMainPrevious": "Tệp trước",
+  "tipMainNext": "Tệp tiếp theo",
+  "tipMainPlayerClose": "Đóng trình phát",
   "tipMainCleanup": "Thẻ",
   "msgMngReorderHint": "Kéo một mục để thay đổi thứ tự. Thứ tự này cũng được sử dụng trong các danh sách của cửa sổ.",
   "lblPrsRateAbr": "Trung bình (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Đang đo âm thanh...",
   "lblWorkCommand": "Lệnh ffmpeg",
   "lblWorkSkipped": "Bị bỏ qua khỏi âm thanh:",
-  "btnWorkCommandCopy": "Sao chép",
   "tipWorkCommandCopy": "Sao chép lệnh vào bảng nhớ tạm",
   "msgWorkCommandNone": "Chọn một tệp để xem lệnh ffmpeg sẽ chạy cho tệp đó",
   "lblStgLog": "Tệp nhật ký",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Luôn được liệt kê: ứng dụng được xây dựng xung quanh nó",
   "msgFxFavouritesFailed": "Không thể giữ danh sách: {reason}",
   "lblMainAudio": "Âm thanh",
-  "tabStgAudio": "Âm thanh"
+  "tabStgAudio": "Âm thanh",
+  "btnMainEncode": "Mã hóa",
+  "btnWorkCommandCopy": "Sao chép"
 }

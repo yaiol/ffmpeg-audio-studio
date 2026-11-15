@@ -17,7 +17,6 @@
   "btnMainAddFolder": "폴더 추가",
   "btnMainClear": "목록 지우기",
   "btnMainApply": "적용",
-  "btnMainConvert": "변환",
   "btnMainStop": "중지",
   "lblMainOverwriteSkip": "건너뛰기",
   "lblMainOverwriteOverwrite": "덮어쓰기",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n}개 선택됨",
   "tipMainApply": "선택한 파일에 이 선택 사항을 적용합니다",
   "msgMainProgress": "{total}개 파일 중 {done}개 처리됨",
-  "tipMainOpenOutput": "출력 폴더 열기",
+  "tipMainShowFile": "파일을 폴더에서 보기",
+  "tipMainStop": "중지",
+  "tipMainPrevious": "이전 파일",
+  "tipMainNext": "다음 파일",
+  "tipMainPlayerClose": "플레이어 닫기",
   "tipMainCleanup": "태그",
   "msgMngReorderHint": "항목을 드래그하여 순서를 변경하세요. 동일한 순서가 창의 목록에 사용됩니다.",
   "lblPrsRateAbr": "평균 (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "소리 측정 중...",
   "lblWorkCommand": "ffmpeg 명령",
   "lblWorkSkipped": "소리에서 제외됨:",
-  "btnWorkCommandCopy": "복사",
   "tipWorkCommandCopy": "명령을 클립보드에 복사",
   "msgWorkCommandNone": "ffmpeg가 실행할 명령을 보려면 파일을 선택하세요",
   "lblStgLog": "로그 파일",
@@ -243,5 +245,7 @@
   "tipFxLocked": "항상 목록에 표시됨: 앱이 이를 중심으로 구축되었습니다",
   "msgFxFavouritesFailed": "목록을 유지할 수 없습니다: {reason}",
   "lblMainAudio": "오디오",
-  "tabStgAudio": "오디오"
+  "tabStgAudio": "오디오",
+  "btnMainEncode": "인코딩",
+  "btnWorkCommandCopy": "복사"
 }

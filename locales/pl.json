@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Dodaj folder",
   "btnMainClear": "Wyczyść listę",
   "btnMainApply": "Zastosuj",
-  "btnMainConvert": "Konwertuj",
   "btnMainStop": "Zatrzymaj",
   "lblMainOverwriteSkip": "Pomiń",
   "lblMainOverwriteOverwrite": "Zastąp",
@@ -80,7 +79,11 @@
   "msgMainSelected": "Wybrano: {n}",
   "tipMainApply": "Zastosuj te opcje do wybranych plików",
   "msgMainProgress": "{done} z {total} plików przetworzono",
-  "tipMainOpenOutput": "Otwórz folder wyjściowy",
+  "tipMainShowFile": "Pokaż plik w jego folderze",
+  "tipMainStop": "Zatrzymaj",
+  "tipMainPrevious": "Poprzedni plik",
+  "tipMainNext": "Następny plik",
+  "tipMainPlayerClose": "Zamknij odtwarzacz",
   "tipMainCleanup": "Tagi",
   "msgMngReorderHint": "Przeciągnij wpis, aby zmienić kolejność. Ta sama kolejność jest używana na listach okna.",
   "lblPrsRateAbr": "Średnia (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Mierzenie dźwięku...",
   "lblWorkCommand": "Polecenie ffmpeg",
   "lblWorkSkipped": "Pominięto z dźwięku:",
-  "btnWorkCommandCopy": "Kopiuj",
   "tipWorkCommandCopy": "Skopiuj polecenie do schowka",
   "msgWorkCommandNone": "Wybierz plik, aby zobaczyć polecenie, które ffmpeg dla niego uruchomi",
   "lblStgLog": "Plik dziennika",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Zawsze na liście: aplikacja jest na tym zbudowana",
   "msgFxFavouritesFailed": "Nie udało się zachować listy: {reason}",
   "lblMainAudio": "Dźwięk",
-  "tabStgAudio": "Dźwięk"
+  "tabStgAudio": "Dźwięk",
+  "btnMainEncode": "Koduj",
+  "btnWorkCommandCopy": "Kopiuj"
 }

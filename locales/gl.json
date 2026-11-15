@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Engadir cartafol",
   "btnMainClear": "Limpar a lista",
   "btnMainApply": "Aplicar",
-  "btnMainConvert": "Converter",
   "btnMainStop": "Deter",
   "lblMainOverwriteSkip": "Omitilo",
   "lblMainOverwriteOverwrite": "Sobrescribilo",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} seleccionados",
   "tipMainApply": "Aplicar estas opcións aos ficheiros seleccionados",
   "msgMainProgress": "{done} de {total} ficheiros procesados",
-  "tipMainOpenOutput": "Abrir o cartafol de saída",
+  "tipMainShowFile": "Mostrar o ficheiro no seu cartafol",
+  "tipMainStop": "Deter",
+  "tipMainPrevious": "Ficheiro anterior",
+  "tipMainNext": "Ficheiro seguinte",
+  "tipMainPlayerClose": "Pechar o reprodutor",
   "tipMainCleanup": "Etiquetas",
   "msgMngReorderHint": "Arrastre unha entrada para cambiar a orde. A mesma orde úsase nas listas da xanela.",
   "lblPrsRateAbr": "Media (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Medindo o son...",
   "lblWorkCommand": "Comando ffmpeg",
   "lblWorkSkipped": "Excluído do son:",
-  "btnWorkCommandCopy": "Copiar",
   "tipWorkCommandCopy": "Copiar o comando ao portapapeis",
   "msgWorkCommandNone": "Seleccione un ficheiro para ver o comando que ffmpeg executará para el",
   "lblStgLog": "Ficheiro de rexistro",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Sempre na lista: a aplicación está construída arredor del",
   "msgFxFavouritesFailed": "Non se puido manter a lista: {reason}",
   "lblMainAudio": "Audio",
-  "tabStgAudio": "Audio"
+  "tabStgAudio": "Audio",
+  "btnMainEncode": "Codificar",
+  "btnWorkCommandCopy": "Copiar"
 }

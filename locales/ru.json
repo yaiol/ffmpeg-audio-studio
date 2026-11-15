@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Добавить папку",
   "btnMainClear": "Очистить список",
   "btnMainApply": "Применить",
-  "btnMainConvert": "Конвертировать",
   "btnMainStop": "Остановить",
   "lblMainOverwriteSkip": "Пропустить",
   "lblMainOverwriteOverwrite": "Перезаписать",
@@ -80,7 +79,11 @@
   "msgMainSelected": "Выбрано: {n}",
   "tipMainApply": "Применить эти параметры к выбранным файлам",
   "msgMainProgress": "{done} из {total} файлов обработано",
-  "tipMainOpenOutput": "Открыть папку вывода",
+  "tipMainShowFile": "Показать файл в его папке",
+  "tipMainStop": "Остановить",
+  "tipMainPrevious": "Предыдущий файл",
+  "tipMainNext": "Следующий файл",
+  "tipMainPlayerClose": "Закрыть проигрыватель",
   "tipMainCleanup": "Теги",
   "msgMngReorderHint": "Перетащите запись, чтобы изменить порядок. Тот же порядок используется в списках окна.",
   "lblPrsRateAbr": "Среднее (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Измерение звука...",
   "lblWorkCommand": "Команда ffmpeg",
   "lblWorkSkipped": "Исключено из звука:",
-  "btnWorkCommandCopy": "Копировать",
   "tipWorkCommandCopy": "Скопировать команду в буфер обмена",
   "msgWorkCommandNone": "Выберите файл, чтобы увидеть команду, которую ffmpeg для него запустит",
   "lblStgLog": "Файл журнала",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Всегда в списке: приложение построено вокруг него",
   "msgFxFavouritesFailed": "Список не удалось сохранить: {reason}",
   "lblMainAudio": "Аудио",
-  "tabStgAudio": "Аудио"
+  "tabStgAudio": "Аудио",
+  "btnMainEncode": "Кодировать",
+  "btnWorkCommandCopy": "Копировать"
 }

@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Tambah folder",
   "btnMainClear": "Hapus daftar",
   "btnMainApply": "Terapkan",
-  "btnMainConvert": "Konversi",
   "btnMainStop": "Berhenti",
   "lblMainOverwriteSkip": "Lewati",
   "lblMainOverwriteOverwrite": "Timpa",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} terpilih",
   "tipMainApply": "Terapkan pilihan ini ke berkas yang dipilih",
   "msgMainProgress": "{done} dari {total} berkas diproses",
-  "tipMainOpenOutput": "Buka folder keluaran",
+  "tipMainShowFile": "Tampilkan berkas di foldernya",
+  "tipMainStop": "Berhenti",
+  "tipMainPrevious": "Berkas sebelumnya",
+  "tipMainNext": "Berkas berikutnya",
+  "tipMainPlayerClose": "Tutup pemutar",
   "tipMainCleanup": "Tag",
   "msgMngReorderHint": "Seret entri untuk mengubah urutan. Urutan yang sama digunakan dalam daftar jendela.",
   "lblPrsRateAbr": "Rata-rata (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Mengukur suara...",
   "lblWorkCommand": "Perintah ffmpeg",
   "lblWorkSkipped": "Ditinggalkan dari suara:",
-  "btnWorkCommandCopy": "Salin",
   "tipWorkCommandCopy": "Salin perintah ke papan klip",
   "msgWorkCommandNone": "Pilih file untuk melihat perintah yang akan dijalankan ffmpeg untuknya",
   "lblStgLog": "Berkas log",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Selalu terdaftar: aplikasi dibangun di sekitarnya",
   "msgFxFavouritesFailed": "Daftar tidak dapat disimpan: {reason}",
   "lblMainAudio": "Audio",
-  "tabStgAudio": "Audio"
+  "tabStgAudio": "Audio",
+  "btnMainEncode": "Enkode",
+  "btnWorkCommandCopy": "Salin"
 }

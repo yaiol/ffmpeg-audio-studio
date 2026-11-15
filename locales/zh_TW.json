@@ -17,7 +17,6 @@
   "btnMainAddFolder": "新增資料夾",
   "btnMainClear": "清空列表",
   "btnMainApply": "套用",
-  "btnMainConvert": "轉換",
   "btnMainStop": "停止",
   "lblMainOverwriteSkip": "跳過",
   "lblMainOverwriteOverwrite": "覆寫",
@@ -80,7 +79,11 @@
   "msgMainSelected": "已選取 {n} 個",
   "tipMainApply": "將這些選擇套用到選取的檔案",
   "msgMainProgress": "已處理 {done}/{total} 個檔案",
-  "tipMainOpenOutput": "開啟輸出資料夾",
+  "tipMainShowFile": "在資料夾中顯示檔案",
+  "tipMainStop": "停止",
+  "tipMainPrevious": "上一個檔案",
+  "tipMainNext": "下一個檔案",
+  "tipMainPlayerClose": "關閉播放器",
   "tipMainCleanup": "標籤",
   "msgMngReorderHint": "拖曳項目以變更順序。視窗的清單中會使用相同的順序。",
   "lblPrsRateAbr": "平均 (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "正在測量聲音...",
   "lblWorkCommand": "ffmpeg 命令",
   "lblWorkSkipped": "從聲音中排除:",
-  "btnWorkCommandCopy": "複製",
   "tipWorkCommandCopy": "將命令複製到剪貼簿",
   "msgWorkCommandNone": "選擇一個檔案以查看 ffmpeg 將為其執行的命令",
   "lblStgLog": "記錄檔",
@@ -243,5 +245,7 @@
   "tipFxLocked": "始終列出：應用程式以此為核心建置",
   "msgFxFavouritesFailed": "無法保留清單: {reason}",
   "lblMainAudio": "音訊",
-  "tabStgAudio": "音訊"
+  "tabStgAudio": "音訊",
+  "btnMainEncode": "編碼",
+  "btnWorkCommandCopy": "複製"
 }

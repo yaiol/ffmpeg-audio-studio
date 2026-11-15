@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Ավելացնել թղթապանակ",
   "btnMainClear": "Մաքրել ցուցակը",
   "btnMainApply": "Կիրառել",
-  "btnMainConvert": "Փոխակերպել",
   "btnMainStop": "Դադարեցնել",
   "lblMainOverwriteSkip": "Բաց թողնել",
   "lblMainOverwriteOverwrite": "Վերագրել",
@@ -80,7 +79,11 @@
   "msgMainSelected": "Ընտրված է {n}",
   "tipMainApply": "Կիրառել այս ընտրանքները ընտրված ֆայլերին",
   "msgMainProgress": "{done} ֆայլ {total}-ից մշակված",
-  "tipMainOpenOutput": "Բացել ելքային թղթապանակը",
+  "tipMainShowFile": "Ցուցադրել ֆայլը իր թղթապանակում",
+  "tipMainStop": "Դադարեցնել",
+  "tipMainPrevious": "Նախորդ ֆայլը",
+  "tipMainNext": "Հաջորդ ֆայլը",
+  "tipMainPlayerClose": "Փակել նվագարկիչը",
   "tipMainCleanup": "Թեգեր",
   "msgMngReorderHint": "Քաշեք մուտքը՝ հերթականությունը փոխելու համար։ Նույն հերթականությունն օգտագործվում է պատուհանի ցուցակներում։",
   "lblPrsRateAbr": "Միջին (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Ձայնի չափում...",
   "lblWorkCommand": "ffmpeg հրաման",
   "lblWorkSkipped": "Ձայնից դուրս մնացած:",
-  "btnWorkCommandCopy": "Պատճենել",
   "tipWorkCommandCopy": "Պատճենել հրամանը սեղանադիր տախտակին",
   "msgWorkCommandNone": "Ընտրեք ֆայլ՝ տեսնելու համար, թե ffmpeg-ը ինչ հրաման կգործարկի դրա համար",
   "lblStgLog": "Գրանցամատյանի ֆայլ",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Միշտ ցուցակված է. հավելվածը կառուցված է դրա շուրջ",
   "msgFxFavouritesFailed": "Ցուցակը հնարավոր չէ պահել. {reason}",
   "lblMainAudio": "Ձայն",
-  "tabStgAudio": "Ձայն"
+  "tabStgAudio": "Ձայն",
+  "btnMainEncode": "Կոդավորել",
+  "btnWorkCommandCopy": "Պատճենել"
 }

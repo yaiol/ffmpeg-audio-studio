@@ -21,9 +21,10 @@ use crate::{
     runner::RUNNER,
 };
 use dioxus::prelude::*;
+use crate::icons::{self, FileIcon};
 use dioxus_free_icons::{
     Icon,
-    icons::ld_icons::{LdChevronLeft, LdChevronRight, LdChevronsDown, LdChevronsUp, LdActivity, LdArrowLeftRight, LdAudioLines, LdList, LdPause, LdPlay, LdSlidersVertical, LdVolume2, LdVolumeX, LdX},
+    icons::ld_icons::{LdChevronLeft, LdChevronRight, LdChevronsDown, LdChevronsUp, LdActivity, LdArrowLeftRight, LdAudioLines, LdList, LdPause, LdPlay, LdSquare, LdSlidersVertical, LdVolume2, LdVolumeX},
 };
 use engine::{
     effects,
@@ -305,6 +306,7 @@ pub fn PreviewPane(state: Signal<State>, mut pos: Signal<f64>, visible: bool, on
     let s_back = t("tipWorkBackSecond");
     let s_forward = t("tipWorkForwardSecond");
     let s_play = if playing() { t("tipWorkPause") } else { t("tipWorkPlay") };
+    let s_stop = t("tipMainStop");
     let s_clear = t("tipWorkClearCut");
     let s_mute = if muted() { t("tipWorkUnmute") } else { t("tipWorkMute") };
     let s_volume = t("tipWorkVolume");
@@ -490,12 +492,12 @@ pub fn PreviewPane(state: Signal<State>, mut pos: Signal<f64>, visible: bool, on
                 }
                 div { class: "wv-bar",
                     button {
-                        class: "uis-btn",
+                        class: "uis-btn ico",
                         title: "{s_set_in}",
                         "aria-label": "{s_set_in}",
                         disabled: !ready,
                         onclick: move |_| on_mark.call(Mark::Start(range_time(*pos.peek()))),
-                        "["
+                        FileIcon { svg: icons::CUT_START }
                     }
                     button {
                         class: "uis-btn ico",
@@ -508,7 +510,7 @@ pub fn PreviewPane(state: Signal<State>, mut pos: Signal<f64>, visible: bool, on
                                 start_sound(window_start);
                             }
                         },
-                        "|<"
+                        FileIcon { svg: icons::GOTO_START }
                     }
                     button {
                         class: "uis-btn ico",
@@ -547,6 +549,18 @@ pub fn PreviewPane(state: Signal<State>, mut pos: Signal<f64>, visible: bool, on
                     }
                     button {
                         class: "uis-btn ico",
+                        title: "{s_stop}",
+                        "aria-label": "{s_stop}",
+                        disabled: !ready,
+                        // Stop goes back to where play starts: the start of the cut, the start of the file without one.
+                        onclick: move |_| {
+                            stop_sound();
+                            pos.set(window_start);
+                        },
+                        Icon { width: 14, height: 14, icon: LdSquare }
+                    }
+                    button {
+                        class: "uis-btn ico",
                         title: "{s_forward}",
                         "aria-label": "{s_forward}",
                         disabled: !ready,
@@ -566,23 +580,23 @@ pub fn PreviewPane(state: Signal<State>, mut pos: Signal<f64>, visible: bool, on
                             stop_sound();
                             pos.set(window_end);
                         },
-                        ">|"
+                        FileIcon { svg: icons::GOTO_END }
                     }
                     button {
-                        class: "uis-btn",
+                        class: "uis-btn ico",
                         title: "{s_set_out}",
                         "aria-label": "{s_set_out}",
                         disabled: !ready,
                         onclick: move |_| on_mark.call(Mark::End(range_time_end(*pos.peek()))),
-                        "]"
+                        FileIcon { svg: icons::CUT_END }
                     }
                     button {
-                        class: "uis-btn ico subtle",
+                        class: "uis-btn ico",
                         title: "{s_clear}",
                         "aria-label": "{s_clear}",
                         disabled: kept.is_none(),
                         onclick: move |_| on_mark.call(Mark::Clear),
-                        Icon { width: 14, height: 14, icon: LdX }
+                        FileIcon { svg: icons::CUT_RESET }
                     }
                     button {
                         class: "uis-btn ico subtle",

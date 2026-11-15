@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Додај фасциклу",
   "btnMainClear": "Очисти листу",
   "btnMainApply": "Примени",
-  "btnMainConvert": "Конвертуј",
   "btnMainStop": "Заустави",
   "lblMainOverwriteSkip": "Прескочи",
   "lblMainOverwriteOverwrite": "Препиши",
@@ -80,7 +79,11 @@
   "msgMainSelected": "Изабрано: {n}",
   "tipMainApply": "Примените ове изборе на изабране датотеке",
   "msgMainProgress": "{done} од {total} датотека обрађено",
-  "tipMainOpenOutput": "Отвори излазну фасциклу",
+  "tipMainShowFile": "Прикажи датотеку у њеној фасцикли",
+  "tipMainStop": "Заустави",
+  "tipMainPrevious": "Претходна датотека",
+  "tipMainNext": "Следећа датотека",
+  "tipMainPlayerClose": "Затвори плејер",
   "tipMainCleanup": "Ознаке",
   "msgMngReorderHint": "Превуците ставку да бисте променили редослед. Исти редослед се користи у листама прозора.",
   "lblPrsRateAbr": "Просечно (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Merenje zvuka...",
   "lblWorkCommand": "ffmpeg команда",
   "lblWorkSkipped": "Изостављено из звука:",
-  "btnWorkCommandCopy": "Копирај",
   "tipWorkCommandCopy": "Копирај команду у оставу",
   "msgWorkCommandNone": "Изаберите датотеку да бисте видели команду коју ће ffmpeg покренути за њу",
   "lblStgLog": "Датотека евиденције",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Увек на листи: апликација је изграђена око тога",
   "msgFxFavouritesFailed": "Листа није могла бити задржана: {reason}",
   "lblMainAudio": "Аудио",
-  "tabStgAudio": "Аудио"
+  "tabStgAudio": "Аудио",
+  "btnMainEncode": "Кодирај",
+  "btnWorkCommandCopy": "Копирај"
 }

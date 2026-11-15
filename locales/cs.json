@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Přidat složku",
   "btnMainClear": "Vymazat seznam",
   "btnMainApply": "Použít",
-  "btnMainConvert": "Převést",
   "btnMainStop": "Zastavit",
   "lblMainOverwriteSkip": "Přeskočit",
   "lblMainOverwriteOverwrite": "Přepsat",
@@ -80,7 +79,11 @@
   "msgMainSelected": "Vybráno: {n}",
   "tipMainApply": "Použít tyto volby na vybrané soubory",
   "msgMainProgress": "{done} z {total} souborů zpracováno",
-  "tipMainOpenOutput": "Otevřít výstupní složku",
+  "tipMainShowFile": "Zobrazit soubor v jeho složce",
+  "tipMainStop": "Zastavit",
+  "tipMainPrevious": "Předchozí soubor",
+  "tipMainNext": "Další soubor",
+  "tipMainPlayerClose": "Zavřít přehrávač",
   "tipMainCleanup": "Štítky",
   "msgMngReorderHint": "Přetáhněte položku pro změnu pořadí. Stejné pořadí se používá v seznamech okna.",
   "lblPrsRateAbr": "Průměr (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Měření zvuku...",
   "lblWorkCommand": "Příkaz ffmpeg",
   "lblWorkSkipped": "Vyřazeno ze zvuku:",
-  "btnWorkCommandCopy": "Kopírovat",
   "tipWorkCommandCopy": "Zkopírovat příkaz do schránky",
   "msgWorkCommandNone": "Vyberte soubor pro zobrazení příkazu, který pro něj ffmpeg spustí",
   "lblStgLog": "Soubor protokolu",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Vždy uvedeno: aplikace je na tom postavena",
   "msgFxFavouritesFailed": "Seznam se nepodařilo zachovat: {reason}",
   "lblMainAudio": "Zvuk",
-  "tabStgAudio": "Zvuk"
+  "tabStgAudio": "Zvuk",
+  "btnMainEncode": "Kódovat",
+  "btnWorkCommandCopy": "Kopírovat"
 }

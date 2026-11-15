@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Lisää kansio",
   "btnMainClear": "Tyhjennä lista",
   "btnMainApply": "Käytä",
-  "btnMainConvert": "Muunna",
   "btnMainStop": "Pysäytä",
   "lblMainOverwriteSkip": "Ohita",
   "lblMainOverwriteOverwrite": "Korvaa",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} valittu",
   "tipMainApply": "Käytä näitä valintoja valittuihin tiedostoihin",
   "msgMainProgress": "{done}/{total} tiedostoa käsitelty",
-  "tipMainOpenOutput": "Avaa tulostuskansio",
+  "tipMainShowFile": "Näytä tiedosto sen kansiossa",
+  "tipMainStop": "Pysäytä",
+  "tipMainPrevious": "Edellinen tiedosto",
+  "tipMainNext": "Seuraava tiedosto",
+  "tipMainPlayerClose": "Sulje soitin",
   "tipMainCleanup": "Tunnisteet",
   "msgMngReorderHint": "Vedä kohdetta muuttaaksesi järjestystä. Samaa järjestystä käytetään ikkunan luetteloissa.",
   "lblPrsRateAbr": "Keskimääräinen (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Ääntä mitataan...",
   "lblWorkCommand": "ffmpeg-komento",
   "lblWorkSkipped": "Jätetty pois äänestä:",
-  "btnWorkCommandCopy": "Kopioi",
   "tipWorkCommandCopy": "Kopioi komento leikepöydälle",
   "msgWorkCommandNone": "Valitse tiedosto nähdäksesi komennon, jonka ffmpeg suorittaa sille",
   "lblStgLog": "Lokitiedosto",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Aina luettelossa: sovellus on rakennettu sen ympärille",
   "msgFxFavouritesFailed": "Luetteloa ei voitu säilyttää: {reason}",
   "lblMainAudio": "Ääni",
-  "tabStgAudio": "Ääni"
+  "tabStgAudio": "Ääni",
+  "btnMainEncode": "Koodaa",
+  "btnWorkCommandCopy": "Kopioi"
 }

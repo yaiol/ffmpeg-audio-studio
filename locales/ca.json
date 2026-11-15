@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Afegeix carpeta",
   "btnMainClear": "Neteja la llista",
   "btnMainApply": "Aplica",
-  "btnMainConvert": "Converteix",
   "btnMainStop": "Atura",
   "lblMainOverwriteSkip": "Omet-lo",
   "lblMainOverwriteOverwrite": "Sobreescriure'l",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} seleccionats",
   "tipMainApply": "Aplica aquestes opcions als fitxers seleccionats",
   "msgMainProgress": "{done} de {total} fitxers processats",
-  "tipMainOpenOutput": "Obre la carpeta de sortida",
+  "tipMainShowFile": "Mostra el fitxer a la seva carpeta",
+  "tipMainStop": "Atura",
+  "tipMainPrevious": "Fitxer anterior",
+  "tipMainNext": "Fitxer següent",
+  "tipMainPlayerClose": "Tancar el reproductor",
   "tipMainCleanup": "Etiquetes",
   "msgMngReorderHint": "Arrossegueu una entrada per canviar l'ordre. El mateix ordre s'utilitza a les llistes de la finestra.",
   "lblPrsRateAbr": "Mitjana (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Mesurant el so...",
   "lblWorkCommand": "Ordre ffmpeg",
   "lblWorkSkipped": "Exclòs del so:",
-  "btnWorkCommandCopy": "Copia",
   "tipWorkCommandCopy": "Copia l'ordre al porta-retalls",
   "msgWorkCommandNone": "Seleccioneu un fitxer per veure l'ordre que ffmpeg executarà per a ell",
   "lblStgLog": "Fitxer de registre",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Sempre a la llista: l'aplicació està construïda al seu voltant",
   "msgFxFavouritesFailed": "No s'ha pogut mantenir la llista: {reason}",
   "lblMainAudio": "Àudio",
-  "tabStgAudio": "Àudio"
+  "tabStgAudio": "Àudio",
+  "btnMainEncode": "Codifica",
+  "btnWorkCommandCopy": "Copia"
 }

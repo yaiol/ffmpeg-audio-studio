@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Ƙara babban fayil",
   "btnMainClear": "Share jerin",
   "btnMainApply": "Aiwatar",
-  "btnMainConvert": "Canza",
   "btnMainStop": "Tsaya",
   "lblMainOverwriteSkip": "Tsallake shi",
   "lblMainOverwriteOverwrite": "Rubuta a kai",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} an zaɓa",
   "tipMainApply": "Aiwatar da waɗannan zaɓuɓɓuka zuwa fayilolin da aka zaɓa",
   "msgMainProgress": "{done} daga cikin {total} fayiloli an sarrafa su",
-  "tipMainOpenOutput": "Bude babban fayil ɗin fitarwa",
+  "tipMainShowFile": "Nuna fayil a cikin babban fayil",
+  "tipMainStop": "Tsaya",
+  "tipMainPrevious": "Fayil na baya",
+  "tipMainNext": "Fayil na gaba",
+  "tipMainPlayerClose": "Rufe mai kunnawa",
   "tipMainCleanup": "Alamomi",
   "msgMngReorderHint": "Ja shigarwa don canza tsari. Ana amfani da tsari iri ɗaya a cikin jerin taga.",
   "lblPrsRateAbr": "Matsakaici (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Ana auna sauti...",
   "lblWorkCommand": "umarnin ffmpeg",
   "lblWorkSkipped": "An cire daga sauti:",
-  "btnWorkCommandCopy": "Kwafi",
   "tipWorkCommandCopy": "Kwafi umarnin zuwa allon rubutu",
   "msgWorkCommandNone": "Zaɓi fayil don ganin umarnin da ffmpeg zai gudanar masa",
   "lblStgLog": "Fayil ɗin log",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Koyaushe a jere: an gina app ɗin a kansa",
   "msgFxFavouritesFailed": "Ba a iya ajiye jerin ba: {reason}",
   "lblMainAudio": "Sauti",
-  "tabStgAudio": "Sauti"
+  "tabStgAudio": "Sauti",
+  "btnMainEncode": "Kodawa",
+  "btnWorkCommandCopy": "Kwafi"
 }

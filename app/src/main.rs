@@ -13,6 +13,7 @@ mod i18n;
 mod icons;
 mod manager;
 mod notify;
+mod player;
 mod preview_session;
 mod runner;
 mod settings;
@@ -42,12 +43,13 @@ use effects_editor::EffectsEditor;
 use effects_favourites::EffectsFavourites;
 use manager::{CleanupEditor, DestinationEditor, NotifyEditor, PresetEditor};
 
-const CSS: [&str; 8] = [
+const CSS: [&str; 9] = [
     include_str!("../assets/uis-colors.css"),
     include_str!("../assets/uis-app.css"),
     include_str!("../assets/uis-bar-window.css"),
     include_str!("../assets/uis-listview.css"),
     include_str!("../assets/uis-fld-labelled.css"),
+    include_str!("../assets/uis-code-box.css"),
     include_str!("../assets/uis-sld.css"),
     include_str!("../assets/app.css"),
     include_str!("../assets/effects_form.css"),

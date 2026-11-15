@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Додати теку",
   "btnMainClear": "Очистити список",
   "btnMainApply": "Застосувати",
-  "btnMainConvert": "Конвертувати",
   "btnMainStop": "Зупинити",
   "lblMainOverwriteSkip": "Пропустити",
   "lblMainOverwriteOverwrite": "Перезаписати",
@@ -80,7 +79,11 @@
   "msgMainSelected": "Вибрано: {n}",
   "tipMainApply": "Застосувати ці параметри до вибраних файлів",
   "msgMainProgress": "{done} з {total} файлів оброблено",
-  "tipMainOpenOutput": "Відкрити папку виводу",
+  "tipMainShowFile": "Показати файл у його папці",
+  "tipMainStop": "Зупинити",
+  "tipMainPrevious": "Попередній файл",
+  "tipMainNext": "Наступний файл",
+  "tipMainPlayerClose": "Закрити програвач",
   "tipMainCleanup": "Теги",
   "msgMngReorderHint": "Перетягніть запис, щоб змінити порядок. Той самий порядок використовується у списках вікна.",
   "lblPrsRateAbr": "Середнє (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Вимірювання звуку...",
   "lblWorkCommand": "Команда ffmpeg",
   "lblWorkSkipped": "Виключено зі звуку:",
-  "btnWorkCommandCopy": "Копіювати",
   "tipWorkCommandCopy": "Скопіювати команду в буфер обміну",
   "msgWorkCommandNone": "Виберіть файл, щоб побачити команду, яку ffmpeg для нього запустить",
   "lblStgLog": "Файл журналу",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Завжди в списку: програма побудована навколо нього",
   "msgFxFavouritesFailed": "Список не вдалося зберегти: {reason}",
   "lblMainAudio": "Аудіо",
-  "tabStgAudio": "Аудіо"
+  "tabStgAudio": "Аудіо",
+  "btnMainEncode": "Кодувати",
+  "btnWorkCommandCopy": "Копіювати"
 }

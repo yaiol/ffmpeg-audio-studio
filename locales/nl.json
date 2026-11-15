@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Map toevoegen",
   "btnMainClear": "Lijst wissen",
   "btnMainApply": "Toepassen",
-  "btnMainConvert": "Converteren",
   "btnMainStop": "Stoppen",
   "lblMainOverwriteSkip": "Overslaan",
   "lblMainOverwriteOverwrite": "Overschrijven",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} geselecteerd",
   "tipMainApply": "Pas deze keuzes toe op de geselecteerde bestanden",
   "msgMainProgress": "{done} van {total} bestanden verwerkt",
-  "tipMainOpenOutput": "Uitvoermap openen",
+  "tipMainShowFile": "Toon het bestand in de map",
+  "tipMainStop": "Stoppen",
+  "tipMainPrevious": "Vorig bestand",
+  "tipMainNext": "Volgend bestand",
+  "tipMainPlayerClose": "Speler sluiten",
   "tipMainCleanup": "Tags",
   "msgMngReorderHint": "Sleep een item om de volgorde te wijzigen. Dezelfde volgorde wordt gebruikt in de lijsten van het venster.",
   "lblPrsRateAbr": "Gemiddeld (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Geluid meten...",
   "lblWorkCommand": "ffmpeg-commando",
   "lblWorkSkipped": "Weggelaten uit het geluid:",
-  "btnWorkCommandCopy": "Kopiëren",
   "tipWorkCommandCopy": "Kopieer het commando naar het klembord",
   "msgWorkCommandNone": "Selecteer een bestand om het commando te zien dat ffmpeg ervoor zal uitvoeren",
   "lblStgLog": "Logbestand",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Altijd vermeld: de app is eromheen gebouwd",
   "msgFxFavouritesFailed": "De lijst kon niet worden bewaard: {reason}",
   "lblMainAudio": "Audio",
-  "tabStgAudio": "Audio"
+  "tabStgAudio": "Audio",
+  "btnMainEncode": "Coderen",
+  "btnWorkCommandCopy": "Kopiëren"
 }

@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Ongeza folda",
   "btnMainClear": "Futa orodha",
   "btnMainApply": "Tekeleza",
-  "btnMainConvert": "Badilisha",
   "btnMainStop": "Simamisha",
   "lblMainOverwriteSkip": "Ruka",
   "lblMainOverwriteOverwrite": "Andika upya",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} zimechaguliwa",
   "tipMainApply": "Tekeleza chaguo hizi kwa faili zilizochaguliwa",
   "msgMainProgress": "{done} kati ya {total} faili zimechakatwa",
-  "tipMainOpenOutput": "Fungua folda ya matokeo",
+  "tipMainShowFile": "Onyesha faili kwenye folda yake",
+  "tipMainStop": "Simamisha",
+  "tipMainPrevious": "Faili iliyopita",
+  "tipMainNext": "Faili inayofuata",
+  "tipMainPlayerClose": "Funga kichezaji",
   "tipMainCleanup": "Lebo",
   "msgMngReorderHint": "Buruta kipengee ili kubadilisha mpangilio. Mpangilio huo huo hutumika katika orodha za dirisha.",
   "lblPrsRateAbr": "Wastani (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Inapima sauti...",
   "lblWorkCommand": "amri ya ffmpeg",
   "lblWorkSkipped": "Kimeachwa nje ya sauti:",
-  "btnWorkCommandCopy": "Nakili",
   "tipWorkCommandCopy": "Nakili amri kwenye ubao wa kunakili",
   "msgWorkCommandNone": "Chagua faili ili kuona amri ambayo ffmpeg itaendesha kwa ajili yake",
   "lblStgLog": "Faili ya kumbukumbu",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Huorodheshwa kila wakati: programu imeundwa kuizunguka",
   "msgFxFavouritesFailed": "Orodha haikuweza kuhifadhiwa: {reason}",
   "lblMainAudio": "Sauti",
-  "tabStgAudio": "Sauti"
+  "tabStgAudio": "Sauti",
+  "btnMainEncode": "Weka msimbo",
+  "btnWorkCommandCopy": "Nakili"
 }

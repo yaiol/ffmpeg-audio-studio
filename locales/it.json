@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Aggiungi cartella",
   "btnMainClear": "Svuota elenco",
   "btnMainApply": "Applica",
-  "btnMainConvert": "Converti",
   "btnMainStop": "Ferma",
   "lblMainOverwriteSkip": "Salta",
   "lblMainOverwriteOverwrite": "Sovrascrivi",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} selezionati",
   "tipMainApply": "Applica queste scelte ai file selezionati",
   "msgMainProgress": "{done} di {total} file elaborati",
-  "tipMainOpenOutput": "Apri la cartella di output",
+  "tipMainShowFile": "Mostra il file nella sua cartella",
+  "tipMainStop": "Ferma",
+  "tipMainPrevious": "File precedente",
+  "tipMainNext": "File successivo",
+  "tipMainPlayerClose": "Chiudi il lettore",
   "tipMainCleanup": "Tag",
   "msgMngReorderHint": "Trascina una voce per cambiare l'ordine. Lo stesso ordine viene utilizzato negli elenchi della finestra.",
   "lblPrsRateAbr": "Media (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Misurazione del suono...",
   "lblWorkCommand": "Comando ffmpeg",
   "lblWorkSkipped": "Escluso dal suono:",
-  "btnWorkCommandCopy": "Copia",
   "tipWorkCommandCopy": "Copia il comando negli appunti",
   "msgWorkCommandNone": "Seleziona un file per vedere il comando che ffmpeg eseguirà per esso",
   "lblStgLog": "File di log",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Sempre elencato: l'app è costruita attorno ad esso",
   "msgFxFavouritesFailed": "L'elenco non può essere mantenuto: {reason}",
   "lblMainAudio": "Audio",
-  "tabStgAudio": "Audio"
+  "tabStgAudio": "Audio",
+  "btnMainEncode": "Codifica",
+  "btnWorkCommandCopy": "Copia"
 }

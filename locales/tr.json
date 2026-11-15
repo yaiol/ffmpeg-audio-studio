@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Klasör ekle",
   "btnMainClear": "Listeyi temizle",
   "btnMainApply": "Uygula",
-  "btnMainConvert": "Dönüştür",
   "btnMainStop": "Durdur",
   "lblMainOverwriteSkip": "Atla",
   "lblMainOverwriteOverwrite": "Üzerine yaz",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} seçili",
   "tipMainApply": "Bu seçimleri seçili dosyalara uygula",
   "msgMainProgress": "{total} dosyadan {done} tanesi işlendi",
-  "tipMainOpenOutput": "Çıktı klasörünü aç",
+  "tipMainShowFile": "Dosyayı klasöründe göster",
+  "tipMainStop": "Durdur",
+  "tipMainPrevious": "Önceki dosya",
+  "tipMainNext": "Sonraki dosya",
+  "tipMainPlayerClose": "Oynatıcıyı kapat",
   "tipMainCleanup": "Etiketler",
   "msgMngReorderHint": "Sırayı değiştirmek için bir girişi sürükleyin. Aynı sıra pencerenin listelerinde kullanılır.",
   "lblPrsRateAbr": "Ortalama (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Ses ölçülüyor...",
   "lblWorkCommand": "ffmpeg komutu",
   "lblWorkSkipped": "Sesten çıkarıldı:",
-  "btnWorkCommandCopy": "Kopyala",
   "tipWorkCommandCopy": "Komutu panoya kopyala",
   "msgWorkCommandNone": "ffmpeg'in çalıştıracağı komutu görmek için bir dosya seçin",
   "lblStgLog": "Günlük dosyası",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Her zaman listelenir: uygulama bunun üzerine kuruludur",
   "msgFxFavouritesFailed": "Liste tutulamadı: {reason}",
   "lblMainAudio": "Ses",
-  "tabStgAudio": "Ses"
+  "tabStgAudio": "Ses",
+  "btnMainEncode": "Kodla",
+  "btnWorkCommandCopy": "Kopyala"
 }

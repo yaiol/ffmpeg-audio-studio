@@ -17,7 +17,6 @@
   "btnMainAddFolder": "ফোল্ডার যোগ করুন",
   "btnMainClear": "তালিকা পরিষ্কার করুন",
   "btnMainApply": "প্রয়োগ করুন",
-  "btnMainConvert": "রূপান্তর করুন",
   "btnMainStop": "থামান",
   "lblMainOverwriteSkip": "এড়িয়ে যান",
   "lblMainOverwriteOverwrite": "ওভাররাইট করুন",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n}টি নির্বাচিত",
   "tipMainApply": "নির্বাচিত ফাইলগুলিতে এই পছন্দগুলি প্রয়োগ করুন",
   "msgMainProgress": "{total}টি ফাইলের মধ্যে {done}টি প্রক্রিয়া করা হয়েছে",
-  "tipMainOpenOutput": "আউটপুট ফোল্ডার খুলুন",
+  "tipMainShowFile": "ফাইলটি তার ফোল্ডারে দেখান",
+  "tipMainStop": "থামুন",
+  "tipMainPrevious": "পূর্ববর্তী ফাইল",
+  "tipMainNext": "পরবর্তী ফাইল",
+  "tipMainPlayerClose": "প্লেয়ার বন্ধ করুন",
   "tipMainCleanup": "ট্যাগ",
   "msgMngReorderHint": "ক্রম পরিবর্তন করতে একটি এন্ট্রি টেনে আনুন। উইন্ডোর তালিকাগুলিতে একই ক্রম ব্যবহার করা হয়।",
   "lblPrsRateAbr": "গড় (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "শব্দ পরিমাপ করা হচ্ছে...",
   "lblWorkCommand": "ffmpeg কমান্ড",
   "lblWorkSkipped": "শব্দ থেকে বাদ দেওয়া হয়েছে:",
-  "btnWorkCommandCopy": "কপি করুন",
   "tipWorkCommandCopy": "কমান্ডটি ক্লিপবোর্ডে কপি করুন",
   "msgWorkCommandNone": "কমান্ডটি দেখতে একটি ফাইল নির্বাচন করুন যা ffmpeg এর জন্য চালাবে",
   "lblStgLog": "লগ ফাইল",
@@ -243,5 +245,7 @@
   "tipFxLocked": "সর্বদা তালিকাভুক্ত: অ্যাপটি এটি ঘিরে তৈরি করা হয়েছে",
   "msgFxFavouritesFailed": "তালিকাটি রাখা যায়নি: {reason}",
   "lblMainAudio": "অডিও",
-  "tabStgAudio": "অডিও"
+  "tabStgAudio": "অডিও",
+  "btnMainEncode": "এনকোড করুন",
+  "btnWorkCommandCopy": "কপি করুন"
 }

@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Lägg till mapp",
   "btnMainClear": "Rensa listan",
   "btnMainApply": "Verkställ",
-  "btnMainConvert": "Konvertera",
   "btnMainStop": "Stoppa",
   "lblMainOverwriteSkip": "Hoppa över",
   "lblMainOverwriteOverwrite": "Skriv över",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} markerade",
   "tipMainApply": "Verkställ dessa val på de markerade filerna",
   "msgMainProgress": "{done} av {total} filer bearbetade",
-  "tipMainOpenOutput": "Öppna utdatamappen",
+  "tipMainShowFile": "Visa filen i dess mapp",
+  "tipMainStop": "Stoppa",
+  "tipMainPrevious": "Föregående fil",
+  "tipMainNext": "Nästa fil",
+  "tipMainPlayerClose": "Stäng spelaren",
   "tipMainCleanup": "Taggar",
   "msgMngReorderHint": "Dra ett objekt för att ändra ordningen. Samma ordning används i fönstrets listor.",
   "lblPrsRateAbr": "Genomsnitt (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Mäter ljudet...",
   "lblWorkCommand": "ffmpeg-kommando",
   "lblWorkSkipped": "Uteslutet från ljudet:",
-  "btnWorkCommandCopy": "Kopiera",
   "tipWorkCommandCopy": "Kopiera kommandot till urklipp",
   "msgWorkCommandNone": "Välj en fil för att se kommandot som ffmpeg kommer att köra för den",
   "lblStgLog": "Loggfil",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Alltid listad: appen är byggd kring den",
   "msgFxFavouritesFailed": "Listan kunde inte behållas: {reason}",
   "lblMainAudio": "Ljud",
-  "tabStgAudio": "Ljud"
+  "tabStgAudio": "Ljud",
+  "btnMainEncode": "Koda",
+  "btnWorkCommandCopy": "Kopiera"
 }

@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Добавяне на папка",
   "btnMainClear": "Изчистване на списъка",
   "btnMainApply": "Приложи",
-  "btnMainConvert": "Конвертиране",
   "btnMainStop": "Спиране",
   "lblMainOverwriteSkip": "Пропусни го",
   "lblMainOverwriteOverwrite": "Презапиши го",
@@ -80,7 +79,11 @@
   "msgMainSelected": "Избрани: {n}",
   "tipMainApply": "Приложи тези избори към избраните файлове",
   "msgMainProgress": "{done} от {total} файла обработени",
-  "tipMainOpenOutput": "Отворете изходната папка",
+  "tipMainShowFile": "Покажи файла в папката му",
+  "tipMainStop": "Спиране",
+  "tipMainPrevious": "Предишен файл",
+  "tipMainNext": "Следващ файл",
+  "tipMainPlayerClose": "Затвори плейъра",
   "tipMainCleanup": "Етикети",
   "msgMngReorderHint": "Плъзнете запис, за да промените реда. Същият ред се използва в списъците на прозореца.",
   "lblPrsRateAbr": "Средно (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Измерване на звука...",
   "lblWorkCommand": "ffmpeg команда",
   "lblWorkSkipped": "Изключено от звука:",
-  "btnWorkCommandCopy": "Копирай",
   "tipWorkCommandCopy": "Копирайте командата в клипборда",
   "msgWorkCommandNone": "Изберете файл, за да видите командата, която ffmpeg ще изпълни за него",
   "lblStgLog": "Файл с дневник",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Винаги е в списъка: приложението е изградено около него",
   "msgFxFavouritesFailed": "Списъкът не можа да бъде запазен: {reason}",
   "lblMainAudio": "Аудио",
-  "tabStgAudio": "Аудио"
+  "tabStgAudio": "Аудио",
+  "btnMainEncode": "Кодирай",
+  "btnWorkCommandCopy": "Копирай"
 }

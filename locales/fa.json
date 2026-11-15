@@ -17,7 +17,6 @@
   "btnMainAddFolder": "افزودن پوشه",
   "btnMainClear": "پاک کردن لیست",
   "btnMainApply": "اعمال",
-  "btnMainConvert": "تبدیل",
   "btnMainStop": "توقف",
   "lblMainOverwriteSkip": "رد کردن",
   "lblMainOverwriteOverwrite": "بازنویسی",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} انتخاب شده",
   "tipMainApply": "اعمال این گزینه‌ها بر روی فایل‌های انتخاب شده",
   "msgMainProgress": "{done} از {total} فایل پردازش شد",
-  "tipMainOpenOutput": "پوشه خروجی را باز کنید",
+  "tipMainShowFile": "نمایش فایل در پوشه آن",
+  "tipMainStop": "توقف",
+  "tipMainPrevious": "فایل قبلی",
+  "tipMainNext": "فایل بعدی",
+  "tipMainPlayerClose": "بستن پخش‌کننده",
   "tipMainCleanup": "برچسب‌ها",
   "msgMngReorderHint": "یک ورودی را بکشید تا ترتیب آن تغییر کند. همین ترتیب در لیست‌های پنجره استفاده می‌شود.",
   "lblPrsRateAbr": "میانگین (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "در حال اندازه‌گیری صدا...",
   "lblWorkCommand": "دستور ffmpeg",
   "lblWorkSkipped": "از صدا حذف شده:",
-  "btnWorkCommandCopy": "کپی",
   "tipWorkCommandCopy": "دستور را در کلیپ‌بورد کپی کنید",
   "msgWorkCommandNone": "یک فایل را انتخاب کنید تا دستور ffmpeg برای آن را ببینید",
   "lblStgLog": "فایل گزارش",
@@ -243,5 +245,7 @@
   "tipFxLocked": "همیشه در لیست: برنامه بر اساس آن ساخته شده است",
   "msgFxFavouritesFailed": "لیست قابل نگهداری نبود: {reason}",
   "lblMainAudio": "صدا",
-  "tabStgAudio": "صدا"
+  "tabStgAudio": "صدا",
+  "btnMainEncode": "رمزگذاری",
+  "btnWorkCommandCopy": "کپی"
 }

@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Add folder",
   "btnMainClear": "Clear the list",
   "btnMainApply": "Apply",
-  "btnMainConvert": "Convert",
   "btnMainStop": "Stop",
   "lblMainOverwriteSkip": "Skip it",
   "lblMainOverwriteOverwrite": "Overwrite it",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} selected",
   "tipMainApply": "Apply these choices to the selected files",
   "msgMainProgress": "{done} of {total} files processed",
-  "tipMainOpenOutput": "Open the output folder",
+  "tipMainShowFile": "Show the file in its folder",
+  "tipMainStop": "Stop",
+  "tipMainPrevious": "Previous file",
+  "tipMainNext": "Next file",
+  "tipMainPlayerClose": "Close the player",
   "tipMainCleanup": "Tags",
   "msgMngReorderHint": "Drag an entry to change the order. The same order is used in the lists of the window.",
   "lblPrsRateAbr": "Average (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Measuring the sound...",
   "lblWorkCommand": "ffmpeg command",
   "lblWorkSkipped": "Left out of the sound:",
-  "btnWorkCommandCopy": "Copy",
   "tipWorkCommandCopy": "Copy the command to the clipboard",
   "msgWorkCommandNone": "Select a file to see the command ffmpeg will run for it",
   "lblStgLog": "Log file",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Always listed: the app is built around it",
   "msgFxFavouritesFailed": "The list could not be kept: {reason}",
   "lblMainAudio": "Audio",
-  "tabStgAudio": "Audio"
+  "tabStgAudio": "Audio",
+  "btnMainEncode": "Encode",
+  "btnWorkCommandCopy": "Copy"
 }

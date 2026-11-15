@@ -7,7 +7,7 @@
 
 use crate::{
     catalog::{UisAppHeader, UisFldLabelled, LbsDropZone},
-    converter::{Item, NEXT_ID, RunTag, TagKind, nothing_to_do, overall_percent, percent_text, range_between},
+    converter::{Item, NEXT_ID, RunTag, TagKind, nothing_to_do, overall_percent, percent_text, range_between, use_cover_thumbs},
     ffmpeg_panel::{FfmpegPopup, Popup, download_note},
     work_command::CommandPanel,
     i18n, manager,
@@ -21,10 +21,11 @@ use crate::{
     work_level::LevelDrawer,
     work_tone::ToneDrawer,
 };
+use crate::player::{Player, PlayerPane, Track};
 use dioxus::prelude::*;
 use dioxus_free_icons::{
     Icon,
-    icons::ld_icons::{LdEraser, LdFilePlus, LdFolder, LdFolderOpen, LdMusic, LdPlay, LdVolume2, LdSquare, LdX},
+    icons::ld_icons::{LdEraser, LdFilePlus, LdFolder, LdFolderSearch, LdPause, LdMusic, LdPlay, LdVolume2, LdSquare, LdX},
 };
 use engine::{
     JobSpec, JobStatus, Overwrite,
@@ -35,7 +36,7 @@ use engine::{
 };
 use std::{
     collections::{HashMap, HashSet},
-    path::{Path, PathBuf},
+    path::PathBuf,
     sync::atomic::Ordering,
     time::Duration,
 };
@@ -290,6 +291,7 @@ pub fn Work(
     children: Element,
 ) -> Element {
     let mut items = use_signal(Vec::<Item>::new);
+    let thumbs = use_cover_thumbs(items);
     let mut selected = use_signal(HashSet::<u64>::new);
     let mut anchor = use_signal(|| None::<u64>);
     // The view's own list of effects, heard in the preview and applied to the files it is applied to.
@@ -332,6 +334,7 @@ pub fn Work(
 
     let lang = settings.read().lang.clone();
     let t = |key: &str| i18n::t(&lang, key);
+    let player = Player::new();
 
     // The command the first selected file would run with, the panel's choices and the effects as they are now (measured off the UI thread).
     let command = use_resource(move || {
@@ -469,7 +472,6 @@ pub fn Work(
     dest_options.extend(s.destinations.iter().map(|d| (d.id.clone(), d.name.clone())));
     dest_options.push((PICK_ID.to_owned(), t("lblMainDestPick")));
     let destination_id = s.work.destination_id.clone();
-    let saved_folder = Some(PathBuf::from(s.destination_by(&s.work.destination_id).folder.trim())).filter(|p| !p.as_os_str().is_empty());
     let parallel = s.work.parallel;
     let overwrite = s.work.overwrite;
     // Where the selected files disagree the box shows nothing chosen: the value the panel holds is only the first file's.
@@ -487,7 +489,7 @@ pub fn Work(
 
     let s_main_add_files = t("btnMainAddFiles");
     let s_main_stop = t("btnMainStop");
-    let s_main_convert = t("btnMainConvert");
+    let s_main_encode = t("btnMainEncode");
     let s_main_preset = t("lblMainAudio");
     let s_main_cleanup = t("tipMainCleanup");
     let s_main_effects = t("tipMainEffects");
@@ -504,7 +506,6 @@ pub fn Work(
     let s_main_overwrite_overwrite = t("lblMainOverwriteOverwrite");
     let s_main_overwrite_rename = t("lblMainOverwriteRename");
     let s_main_parallel = t("tipMainParallel");
-    let s_main_open_output = t("tipMainOpenOutput");
     let sel_now = selected.read().clone();
     // The names tags are made of, once per render: a row only looks its choices up.
     let cfg = settings.read().clone();
@@ -552,19 +553,19 @@ pub fn Work(
         None
     };
 
-    // Where "open the output folder" goes: the folder of the newest finished file - which is right for "beside the source" too -
-    // and otherwise the chosen folder.
-    let open_target: Option<PathBuf> = statuses
-        .read()
-        .iter()
-        .filter_map(|(id, s)| match s {
-            JobStatus::Done { output } => Some((*id, output.clone())),
-            _ => None,
-        })
-        .max_by_key(|(id, _)| *id)
-        .and_then(|(_, out)| out.parent().map(Path::to_path_buf))
-        .or(saved_folder)
-        .filter(|p| p.is_dir());
+    // The converted files in list order: what the player steps through.
+    let queue: Vec<Track> = {
+        let st = statuses.read();
+        items
+            .read()
+            .iter()
+            .filter_map(|i| match st.get(&i.id) {
+                Some(JobStatus::Done { output }) => Some(Track::of(output)),
+                _ => None,
+            })
+            .collect()
+    };
+
 
     rsx! {
         // ⚠ CLAUDE: the header holds the file actions only (icon-only, tooltips). The choices that shape a
@@ -604,7 +605,7 @@ pub fn Work(
         PreviewPane {
             state: pane_state,
             pos,
-            visible: active,
+            visible: active && !player.is_open(),
             on_mark: {
                 let standard = standard_keys.clone();
                 move |mark: Mark| apply_mark(work_fx, &standard, mark)
@@ -616,6 +617,7 @@ pub fn Work(
                 move |edit: WidgetEdit| apply_widget(work_fx, &standard, edit)
             },
         }
+        PlayerPane { player, queue, lang: lang.clone(), away: !active }
         if drawer() == Drawer::Tone {
             ToneDrawer { list: work_fx, lang: lang.clone(), on_edit: { let standard = standard_keys.clone(); move |edit: WidgetEdit| apply_widget(work_fx, &standard, edit) }, mixed: mixed_now.differing.contains("equalizer") || mixed_now.partial.contains("equalizer") }
         } else if drawer() == Drawer::Compressor {
@@ -656,6 +658,13 @@ pub fn Work(
                         Some(JobStatus::Cancelled) => (t("msgMainStatusCancelled"), String::new(), "idle"),
                         Some(JobStatus::Failed { reason }) => (t("msgMainStatusFailed"), reason.clone(), "err"),
                     };
+                    // A finished row shows two buttons in the place of its badge: play the file in the player, show it in its folder.
+                    let done_file = match &status {
+                        Some(JobStatus::Done { output }) => Some(output.clone()),
+                        _ => None,
+                    };
+                    let sounding = done_file.as_ref().is_some_and(|f| player.is_sounding(f));
+                    let (s_play, s_show) = (if sounding { t("tipWorkPause") } else { t("tipWorkPlay") }, t("tipMainShowFile"));
                     let id = item.id;
                     let path = item.path.display().to_string();
                     let tip = if active { t("tipMainCancel") } else { t("tipMainRemove") };
@@ -708,7 +717,11 @@ pub fn Work(
                                 }
                             },
                             div { class: "uis-lvw-item-icon converter-cover-box",
-                                Icon { width: 18, height: 18, icon: LdMusic }
+                                if let Some(Some(src)) = thumbs.read().get(&id) {
+                                    img { class: "converter-cover", src: "{src}", alt: "" }
+                                } else {
+                                    Icon { width: 18, height: 18, icon: LdMusic }
+                                }
                             }
                             div { class: "uis-lvw-item-body",
                                 div { class: "uis-lvw-item-name", "{item.name}" }
@@ -719,7 +732,35 @@ pub fn Work(
                                     }
                                 }
                             }
-                            if !badge.is_empty() {
+                            if let Some(file) = done_file {
+                                button {
+                                    class: "uis-btn ico subtle",
+                                    title: "{s_play}",
+                                    "aria-label": "{s_play}",
+                                    onclick: {
+                                        let track = Track::of(&file);
+                                        move |e: MouseEvent| {
+                                            e.stop_propagation();
+                                            player.play(track.clone());
+                                        }
+                                    },
+                                    if sounding {
+                                        Icon { width: 14, height: 14, icon: LdPause }
+                                    } else {
+                                        Icon { width: 14, height: 14, icon: LdPlay }
+                                    }
+                                }
+                                button {
+                                    class: "uis-btn ico subtle",
+                                    title: "{s_show}",
+                                    "aria-label": "{s_show}",
+                                    onclick: move |e: MouseEvent| {
+                                        e.stop_propagation();
+                                        crate::converter::show_in_folder(&file);
+                                    },
+                                    Icon { width: 14, height: 14, icon: LdFolderSearch }
+                                }
+                            } else if !badge.is_empty() {
                                 span { class: "uis-lvw-item-badge converter-state converter-state-{state}", title: "{detail}", "{badge}" }
                             }
                             button {
@@ -891,25 +932,11 @@ pub fn Work(
                         }
                     }
                     button {
-                        class: "uis-btn ico",
-                        title: "{s_main_convert}",
-                        "aria-label": "{s_main_convert}",
+                        class: "uis-btn primary",
                         disabled: ffmpeg_missing || !have_items || busy || all_idle_and_plain,
                         onclick: convert,
-                        Icon { width: 14, height: 14, icon: LdPlay }
+                        "{s_main_encode}"
                     }
-                }
-                button {
-                    class: "uis-btn ico",
-                    title: "{s_main_open_output}",
-                    "aria-label": "{s_main_open_output}",
-                    disabled: open_target.is_none(),
-                    onclick: move |_| {
-                        if let Some(p) = &open_target {
-                            let _ = open::that(p);
-                        }
-                    },
-                    Icon { width: 14, height: 14, icon: LdFolderOpen }
                 }
             }
         }

@@ -1,13 +1,14 @@
-// twin: uis-ctl-waveform.jsx jsx@4d66e685205f rsx@c7de728af730
+// twin: uis-ctl-waveform.jsx jsx@f08e16a47a2d rsx@c2717a3f0e57
 //! UisWaveform - twin of `uis-ctl-waveform.jsx`: a sound's waveform on a screen, the part a cut drops dimmed, the
 //! moment as a line, the time row and the timeline under it (a range whose track shows the kept part). Same classes and
-//! element order, so the paired `uis-ctl-waveform.css` skins it.
+//! element order, so the paired `uis-ctl-waveform.css` skins it; the timeline is the catalog's `.uis-sld-timeline`, so the page must hold `uis-sld.css`.
 //!
 //! `peaks` are the waveform's buckets, 0 to 1; `length` the file's seconds and `now` the moment; `kept` is `(start, end)`
 //! in seconds when a cut keeps only part. `now_label` / `length_label` are the two time texts, already formatted.
 //! `on_seek` says where the user put the moment. `children` are drawn on the screen over the waveform.
 //! Differs: the stylesheet is added to the page once by id through `document::eval` (the JSX imports its CSS), because a `document::Style` inside a control logs a warning on every re-render.
 
+use super::wave_bars::UisWaveBars;
 use dioxus::prelude::*;
 
 const CSS: &str = include_str!("../../assets/uis-ctl-waveform.css");
@@ -25,11 +26,6 @@ pub fn UisWaveform(
     children: Element,
 ) -> Element {
     let pct = move |v: f64| if length > 0.0 { (v / length * 100.0).clamp(0.0, 100.0) } else { 0.0 };
-    let mut d = String::new();
-    for (i, v) in peaks.iter().enumerate() {
-        let h = (v * 46.0).max(0.8);
-        d.push_str(&format!("M{i},{:.1}V{:.1}", 50.0 - h, 50.0 + h));
-    }
     let n = peaks.len();
     let region = match kept {
         Some((s, e)) => format!("--in: {:.2}%; --out: {:.2}%", pct(s), pct(e)),
@@ -51,9 +47,7 @@ pub fn UisWaveform(
         div { class: "uis-wvf",
             div { class: "uis-wvf-screen",
                 if n > 0 {
-                    svg { class: "uis-wvf-svg", view_box: "0 0 {n} 100", preserve_aspect_ratio: "none",
-                        path { d: "{d}", stroke: "currentColor", stroke_width: "0.8", fill: "none" }
-                    }
+                    UisWaveBars { peaks: peaks.clone() }
                     if let Some(style) = dim_left {
                         div { class: "uis-wvf-dim", style: "{style}" }
                     }
@@ -69,7 +63,7 @@ pub fn UisWaveform(
                 span { class: "uis-wvf-length", "{length_label}" }
             }
             input {
-                class: "uis-wvf-timeline",
+                class: "uis-sld-timeline",
                 r#type: "range",
                 min: "0",
                 max: "{length}",

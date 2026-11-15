@@ -17,7 +17,6 @@
   "btnMainAddFolder": "ਫੋਲਡਰ ਸ਼ਾਮਲ ਕਰੋ",
   "btnMainClear": "ਸੂਚੀ ਸਾਫ਼ ਕਰੋ",
   "btnMainApply": "ਲਾਗੂ ਕਰੋ",
-  "btnMainConvert": "ਬਦਲੋ",
   "btnMainStop": "ਰੋਕੋ",
   "lblMainOverwriteSkip": "ਛੱਡੋ",
   "lblMainOverwriteOverwrite": "ਓਵਰਰਾਈਟ ਕਰੋ",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} ਚੁਣੇ ਗਏ",
   "tipMainApply": "ਇਹਨਾਂ ਚੋਣਾਂ ਨੂੰ ਚੁਣੀਆਂ ਗਈਆਂ ਫਾਈਲਾਂ 'ਤੇ ਲਾਗੂ ਕਰੋ",
   "msgMainProgress": "{total} ਵਿੱਚੋਂ {done} ਫਾਈਲਾਂ ਪ੍ਰੋਸੈਸ ਕੀਤੀਆਂ ਗਈਆਂ",
-  "tipMainOpenOutput": "ਆਉਟਪੁੱਟ ਫੋਲਡਰ ਖੋਲ੍ਹੋ",
+  "tipMainShowFile": "ਫਾਈਲ ਨੂੰ ਇਸਦੇ ਫੋਲਡਰ ਵਿੱਚ ਦਿਖਾਓ",
+  "tipMainStop": "ਰੋਕੋ",
+  "tipMainPrevious": "ਪਿਛਲੀ ਫਾਈਲ",
+  "tipMainNext": "ਅਗਲੀ ਫਾਈਲ",
+  "tipMainPlayerClose": "ਪਲੇਅਰ ਬੰਦ ਕਰੋ",
   "tipMainCleanup": "ਟੈਗ",
   "msgMngReorderHint": "ਕ੍ਰਮ ਬਦਲਣ ਲਈ ਇੱਕ ਐਂਟਰੀ ਨੂੰ ਖਿੱਚੋ। ਵਿੰਡੋ ਦੀਆਂ ਸੂਚੀਆਂ ਵਿੱਚ ਵੀ ਇਹੀ ਕ੍ਰਮ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ।",
   "lblPrsRateAbr": "ਔਸਤ (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "ਆਵਾਜ਼ ਮਾਪੀ ਜਾ ਰਹੀ ਹੈ...",
   "lblWorkCommand": "ffmpeg ਕਮਾਂਡ",
   "lblWorkSkipped": "ਆਵਾਜ਼ ਵਿੱਚੋਂ ਛੱਡਿਆ ਗਿਆ:",
-  "btnWorkCommandCopy": "ਕਾਪੀ ਕਰੋ",
   "tipWorkCommandCopy": "ਕਮਾਂਡ ਨੂੰ ਕਲਿੱਪਬੋਰਡ 'ਤੇ ਕਾਪੀ ਕਰੋ",
   "msgWorkCommandNone": "ਕਮਾਂਡ ਦੇਖਣ ਲਈ ਇੱਕ ਫਾਈਲ ਚੁਣੋ ਜੋ ffmpeg ਇਸ ਲਈ ਚਲਾਏਗਾ",
   "lblStgLog": "ਲੌਗ ਫਾਈਲ",
@@ -243,5 +245,7 @@
   "tipFxLocked": "ਹਮੇਸ਼ਾ ਸੂਚੀਬੱਧ: ਐਪ ਇਸਦੇ ਆਲੇ-ਦੁਆਲੇ ਬਣਾਈ ਗਈ ਹੈ",
   "msgFxFavouritesFailed": "ਸੂਚੀ ਨੂੰ ਰੱਖਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ: {reason}",
   "lblMainAudio": "ਆਡੀਓ",
-  "tabStgAudio": "ਆਡੀਓ"
+  "tabStgAudio": "ਆਡੀਓ",
+  "btnMainEncode": "ਏਨਕੋਡ ਕਰੋ",
+  "btnWorkCommandCopy": "ਕਾਪੀ ਕਰੋ"
 }

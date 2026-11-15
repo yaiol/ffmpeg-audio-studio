@@ -17,7 +17,6 @@
   "btnMainAddFolder": "Mappa hozzáadása",
   "btnMainClear": "Lista törlése",
   "btnMainApply": "Alkalmaz",
-  "btnMainConvert": "Konvertálás",
   "btnMainStop": "Leállítás",
   "lblMainOverwriteSkip": "Kihagyás",
   "lblMainOverwriteOverwrite": "Felülírás",
@@ -80,7 +79,11 @@
   "msgMainSelected": "{n} kiválasztva",
   "tipMainApply": "Alkalmazza ezeket a beállításokat a kiválasztott fájlokra",
   "msgMainProgress": "{done}/{total} fájl feldolgozva",
-  "tipMainOpenOutput": "Kimeneti mappa megnyitása",
+  "tipMainShowFile": "Fájl megjelenítése a mappájában",
+  "tipMainStop": "Leállítás",
+  "tipMainPrevious": "Előző fájl",
+  "tipMainNext": "Következő fájl",
+  "tipMainPlayerClose": "Lejátszó bezárása",
   "tipMainCleanup": "Címkék",
   "msgMngReorderHint": "Húzzon egy bejegyzést a sorrend megváltoztatásához. Ugyanez a sorrend használatos az ablak listáiban.",
   "lblPrsRateAbr": "Átlagos (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "Hang mérése...",
   "lblWorkCommand": "ffmpeg parancs",
   "lblWorkSkipped": "Kihagyva a hangból:",
-  "btnWorkCommandCopy": "Másolás",
   "tipWorkCommandCopy": "Parancs másolása a vágólapra",
   "msgWorkCommandNone": "Válasszon ki egy fájlt, hogy lássa az ffmpeg által futtatandó parancsot",
   "lblStgLog": "Naplófájl",
@@ -243,5 +245,7 @@
   "tipFxLocked": "Mindig szerepel: az alkalmazás erre épül",
   "msgFxFavouritesFailed": "A lista nem maradt meg: {reason}",
   "lblMainAudio": "Hang",
-  "tabStgAudio": "Hang"
+  "tabStgAudio": "Hang",
+  "btnMainEncode": "Kódolás",
+  "btnWorkCommandCopy": "Másolás"
 }

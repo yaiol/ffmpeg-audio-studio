@@ -17,7 +17,6 @@
   "btnMainAddFolder": "إضافة مجلد",
   "btnMainClear": "مسح القائمة",
   "btnMainApply": "تطبيق",
-  "btnMainConvert": "تحويل",
   "btnMainStop": "إيقاف",
   "lblMainOverwriteSkip": "تخطيه",
   "lblMainOverwriteOverwrite": "الكتابة فوقه",
@@ -80,7 +79,11 @@
   "msgMainSelected": "تم تحديد {n}",
   "tipMainApply": "تطبيق هذه الخيارات على الملفات المحددة",
   "msgMainProgress": "{done} من {total} ملفات تمت معالجتها",
-  "tipMainOpenOutput": "افتح مجلد الإخراج",
+  "tipMainShowFile": "عرض الملف في مجلده",
+  "tipMainStop": "إيقاف",
+  "tipMainPrevious": "الملف السابق",
+  "tipMainNext": "الملف التالي",
+  "tipMainPlayerClose": "إغلاق المشغل",
   "tipMainCleanup": "علامات",
   "msgMngReorderHint": "اسحب إدخالاً لتغيير الترتيب. يُستخدم نفس الترتيب في قوائم النافذة.",
   "lblPrsRateAbr": "متوسط (ABR)",
@@ -229,7 +232,6 @@
   "msgWorkMeasuring": "جاري قياس الصوت...",
   "lblWorkCommand": "أمر ffmpeg",
   "lblWorkSkipped": "مُستبعد من الصوت:",
-  "btnWorkCommandCopy": "نسخ",
   "tipWorkCommandCopy": "انسخ الأمر إلى الحافظة",
   "msgWorkCommandNone": "حدد ملفًا لرؤية الأمر الذي سيشغله ffmpeg له",
   "lblStgLog": "ملف السجل",
@@ -243,5 +245,7 @@
   "tipFxLocked": "مدرج دائمًا: التطبيق مبني عليه",
   "msgFxFavouritesFailed": "تعذر الاحتفاظ بالقائمة: {reason}",
   "lblMainAudio": "صوت",
-  "tabStgAudio": "صوت"
+  "tabStgAudio": "صوت",
+  "btnMainEncode": "ترميز",
+  "btnWorkCommandCopy": "نسخ"
 }
