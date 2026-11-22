@@ -1,7 +1,7 @@
 //! The main view: the file list, the drop target, Convert, and the bar with the preset, the output
 //! destination and the number of conversions at once.
 //!
-//! ⚠ CLAUDE: NO HARDCODED UI STRINGS. Every user-visible string goes through the t() lookup with the key
+//! ⚠ NO HARDCODED UI STRINGS. Every user-visible string goes through the t() lookup with the key
 //! a string literal at the call site.
 
 use crate::{
@@ -404,7 +404,7 @@ pub fn Converter(
     let drop_label = t("msgMainDropLabel");
 
     rsx! {
-        // ⚠ CLAUDE: the header holds the file actions only (icon-only, tooltips). The choices that shape a
+        // ⚠ the header holds the file actions only (icon-only, tooltips). The choices that shape a
         // run - preset, tags, effects, where it goes, how many at once, Convert - live in the right-hand
         // panel below, one aligned column. A second bar under the header was removed on request.
         UisAppHeader { app_name, app_version, bare: true,
@@ -447,7 +447,7 @@ pub fn Converter(
             FfmpegPopup { lang: lang.clone(), popup, on_close: move |_| dismissed.set(true) }
         }
         PlayerPane { player, queue, lang: lang.clone(), away: !active }
-        // ⚠ CLAUDE: tabindex makes the list the thing a click focuses, which is what lets Ctrl+A reach it;
+        // ⚠ tabindex makes the list the thing a click focuses, which is what lets Ctrl+A reach it;
         // a click on the empty part clears the selection (a row's own click stops here).
         div {
             class: "uis-lvw-scroll converter-list",
@@ -724,7 +724,7 @@ pub fn Converter(
                     option { value: "rename", selected: overwrite == Overwrite::Rename, "{s_main_overwrite_rename}" }
                 }
             }
-            // ⚠ CLAUDE: the panel is a brush. It never shows a row's choices and selecting rows never changes
+            // ⚠ the panel is a brush. It never shows a row's choices and selecting rows never changes
             // it; Apply writes ALL of it onto the selected rows, and is off when none can take it.
             button {
                 class: "uis-btn converter-panel-apply",

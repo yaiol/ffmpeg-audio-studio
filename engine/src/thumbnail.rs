@@ -59,7 +59,7 @@ fn embedded_picture(path: &Path) -> Option<Vec<u8>> {
 /// A square JPEG of `size` px - cropped to fill, so every thumbnail is the same shape - from a
 /// picture's bytes. `None` when the format is not one the decoder was built with.
 ///
-/// ⚠ CLAUDE: the first step down is `thumbnail()` (a fast box sample), and only the small result goes
+/// ⚠ the first step down is `thumbnail()` (a fast box sample), and only the small result goes
 /// through the filtered `resize_to_fill`. Filtering a 1400 px cover directly costs 40-50 ms, as much as
 /// decoding it. A JPEG decoder that scales while decoding (`jpeg-decoder`) was tried and was SLOWER
 /// (about 220 ms a cover against 25 ms for the SIMD decoder `image` uses) - do not reintroduce it.

@@ -5,7 +5,7 @@
 //! that have several values in the SOURCE are written onto the output as separate values, with
 //! `lofty`.
 //!
-//! ⚠ CLAUDE: this PATCHES, it does not replace the tag. Everything else ffmpeg wrote - free-form
+//! ⚠ this PATCHES, it does not replace the tag. Everything else ffmpeg wrote - free-form
 //! fields such as a custom `AMLP_ID`, the picture - is left byte for byte, because the generic tag
 //! type cannot represent a free-form field and a full rewrite would lose them.
 //!
@@ -306,7 +306,7 @@ fn patch_vorbis(vc: &mut VorbisComments, groups: &HashMap<ItemKey, Vec<String>>)
 /// Write each repeated field as ONE text frame whose values are separated by a NUL - the way Mp3tag,
 /// foobar2000 and others store several values, in 2.3 and 2.4 alike.
 ///
-/// ⚠ CLAUDE: the frames are built by hand rather than through the generic tag. The generic
+/// ⚠ the frames are built by hand rather than through the generic tag. The generic
 /// conversion keeps several values for some fields (the album artist) and silently keeps only the
 /// FIRST for others (the album-artist SORT field, found on a real album 2026-10-13). It also removes
 /// the `TXXX` copy ffmpeg made of a field it had no frame for, so the file carries each field once.
@@ -356,7 +356,7 @@ fn custom_fields(tags: &HashMap<String, String>) -> Vec<(String, String)> {
 
 /// The ID3 tag ffmpeg would write for this source, taken from a throwaway half-second MP3.
 ///
-/// ⚠ CLAUDE: a WAV\'s ID3 chunk is built from THIS and not from the library\'s generic tag, so a
+/// ⚠ a WAV\'s ID3 chunk is built from THIS and not from the library\'s generic tag, so a
 /// field keeps the name it has in every other output (the generic conversion renames some:
 /// `RELEASETYPE` becomes `MusicBrainz Album Type`). ffmpeg\'s own WAV muxer cannot write an ID3 chunk.
 fn donor_id3(ffmpeg: &Path, source: &Path, v24: bool, tag_args: &[String]) -> Result<Id3v2Tag, String> {
@@ -480,7 +480,7 @@ fn promote_custom_frames(tag: &mut Id3v2Tag, v24: bool, later: &[(String, String
         if matches!(id, "TYER" | "TDRC") {
             continue;
         }
-        // ⚠ CLAUDE: lofty DISCARDS TSOA / TSOP / TSOT (and TMOO) when it writes ID3v2.3, though Mp3tag
+        // ⚠ lofty DISCARDS TSOA / TSOP / TSOT (and TMOO) when it writes ID3v2.3, though Mp3tag
         // writes them there and players read them. They go in under a placeholder id the library lets
         // through (`TZOA`...) and `fix_placeholder_frames` renames them in the written file.
         let placeholder = if v24 { None } else { PLACEHOLDERS.iter().find(|(_, real)| *real == id).map(|(p, _)| *p) };
@@ -725,7 +725,7 @@ fn patch_ilst(ilst: &mut Ilst, groups: &HashMap<ItemKey, Vec<String>>) -> usize 
 ///
 /// `Ok(None)`: nothing to do (format not handled, no tag, or no repeated field).
 ///
-/// ⚠ CLAUDE: each family is patched through ITS OWN tag type (Vorbis comments, `ilst`, ID3v2),
+/// ⚠ each family is patched through ITS OWN tag type (Vorbis comments, `ilst`, ID3v2),
 /// never through the generic tag: the generic one cannot hold a free-form field and silently
 /// drops it on a save - found 2026-10-13 when a custom `AMLP_ID` vanished from FLAC, M4A, Ogg and
 /// Opus outputs (test: repeated_and_free_form_fields_survive_in_every_format_that_can_hold_them).
@@ -1020,7 +1020,7 @@ pub(crate) fn listed(patterns: &[String], names: &[String]) -> bool {
     patterns.iter().any(|p| !p.trim().is_empty() && names.iter().any(|n| name_matches(p, n)))
 }
 
-// ⚠ CLAUDE: the three `remove_listed_*` below drop a FIELD by name and never the picture: the cover is
+// ⚠ the three `remove_listed_*` below drop a FIELD by name and never the picture: the cover is
 // its own switch (`remove_cover`, applied where the picture is taken from the source), so "delete every
 // tag" must not take it along.
 /// Ogg Vorbis and Opus carry a cover as a `METADATA_BLOCK_PICTURE` comment, which ffmpeg does not write.

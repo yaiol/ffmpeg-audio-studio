@@ -2,7 +2,7 @@
 //! the left and the options of the selected entry on the right; every change is stored at once,
 //! there is no Save button.
 //!
-//! ⚠ CLAUDE: NO HARDCODED UI STRINGS. Format names, tag tokens and encoder units are proper
+//! ⚠ NO HARDCODED UI STRINGS. Format names, tag tokens and encoder units are proper
 //! nouns / identifiers and stay literal; everything else goes through the t() lookup with a literal
 //! key at the call site.
 

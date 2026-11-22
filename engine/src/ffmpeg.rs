@@ -414,7 +414,7 @@ pub fn build_args(
     a.push(input.to_string_lossy().into_owned());
     let cover = with_cover && preset.format.carries_cover_art() && !cleanup.remove_cover;
     if cover {
-        // ⚠ CLAUDE: the picture is taken from a SECOND input - the same file again - and not mapped
+        // ⚠ the picture is taken from a SECOND input - the same file again - and not mapped
         // from the first. With the picture on input 0, ffmpeg reports `out_time_us=N/A` for the whole
         // run (the single-frame video stream never advances its clock), so the progress sat at 0 until
         // the file finished (found 2026-10-13, reproduced by `progress_climbs_for_a_file_with_cover_art`).
@@ -589,7 +589,7 @@ pub fn tag_arguments(
             }
         }
     }
-    // ⚠ CLAUDE: a source can carry the ID3v2.3 date frames as keys of their own (a WAV whose ID3 tag has a
+    // ⚠ a source can carry the ID3v2.3 date frames as keys of their own (a WAV whose ID3 tag has a
     // `TYER` frame holding the whole date, found 2026-10-14 on a WAV of the Orange Crush LP). ffmpeg
     // reads them as ordinary fields named `TYER` / `TDAT` / `TIME`, and when it writes ID3v2.3 it
     // writes that stray `TYER=2025-11-24` over the real year it derives from `date` - a year taggers
@@ -602,7 +602,7 @@ pub fn tag_arguments(
             a.push(format!("date={v}"));
         }
     } else if let Some((_, v)) = source_tags.iter().find(|(k, _)| k.eq_ignore_ascii_case("date")) {
-        // ⚠ CLAUDE: a date with a stray carriage return after it (`2026-02-01\r`, found 2026-10-17 on a FLAC another
+        // ⚠ a date with a stray carriage return after it (`2026-02-01\r`, found 2026-10-17 on a FLAC another
         // tool had rewritten) is copied by ffmpeg as it is, and an MP3 then got TWO year frames - ffmpeg's and the
         // tag layer's (`tags::restore_full_date`). The probe has trimmed the value: ffmpeg is handed that one.
         if !v.is_empty() && !emptied.borrow().iter().any(|k| k.eq_ignore_ascii_case("date")) {
@@ -644,7 +644,7 @@ pub fn tag_arguments(
             }
         }
     }
-    // ⚠ CLAUDE: ffmpeg does not write `encoded_by` into an ID3 tag when the field comes from a WAV that
+    // ⚠ ffmpeg does not write `encoded_by` into an ID3 tag when the field comes from a WAV that
     // also has an INFO `ITCH` (the value is read, shown by `ffmpeg -i`, and then lost on the way out;
     // found 2026-10-14 on a WAV Mp3tag wrote). Given as an argument it is written, so it is.
     if let Some((_, value)) = source_tags.iter().find(|(k, _)| k.eq_ignore_ascii_case("encoded_by")) {

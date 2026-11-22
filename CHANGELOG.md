@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.4 — 2026-11-22
+
+- The Windows installer asks whether to install for all users or only for you; only for you needs no administrator rights
+- An install for all users removes the shortcuts and the uninstall entry a previous per-user install left behind
+- The app's own Settings tabs have the same width as General and About
+- In an effect's colour field, the swatch no longer keeps its highlight ring after the picker closes
+- Drop-down panels and the colour picker open above the whole window instead of inside the panel that holds them
+
 ## 2.0.3 — 2026-11-15
 
 - The button that starts the run is now a highlighted text button, Encode, in both views; the play icon is kept for playing a finished file

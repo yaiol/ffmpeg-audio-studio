@@ -2,7 +2,7 @@
 //! (`work_preview.rs`). A copy of the batch view (`converter.rs`) with a compact panel; the list of effects is the view's own, it
 //! is not a saved effects entry.
 //!
-//! ⚠ CLAUDE: NO HARDCODED UI STRINGS. Every user-visible string goes through the t() lookup with the key
+//! ⚠ NO HARDCODED UI STRINGS. Every user-visible string goes through the t() lookup with the key
 //! a string literal at the call site.
 
 use crate::{
@@ -568,7 +568,7 @@ pub fn Work(
 
 
     rsx! {
-        // ⚠ CLAUDE: the header holds the file actions only (icon-only, tooltips). The choices that shape a
+        // ⚠ the header holds the file actions only (icon-only, tooltips). The choices that shape a
         // run - preset, tags, effects, where it goes, how many at once, Convert - live in the right-hand panel below,
         // one aligned column.
         UisAppHeader { app_name, app_version, bare: true,
@@ -629,7 +629,7 @@ pub fn Work(
         } else {
         // the file list and the command share the height every drawer has
         div { class: "work-strip",
-        // ⚠ CLAUDE: tabindex makes the list the thing a click focuses, which is what lets Ctrl+A reach it;
+        // ⚠ tabindex makes the list the thing a click focuses, which is what lets Ctrl+A reach it;
         // a click on the empty part clears the selection (a row's own click stops here).
         div {
             class: "uis-lvw-scroll converter-list work-list",

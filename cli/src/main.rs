@@ -1,4 +1,4 @@
-// ⚠ CLAUDE - NO HARDCODED MESSAGES IN THIS FILE.
+// ⚠ NO HARDCODED MESSAGES IN THIS FILE.
 //   Every message a user can read goes through the i18n lookup with the key a string literal at the call
 //   site, like the window. The one exception is the --help text clap renders: documentation of a flag
 //   is conventionally English, and the flags themselves are not translated.

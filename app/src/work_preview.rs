@@ -10,7 +10,7 @@
 //! silence needs run first (the pane says "Measuring the sound..."), then the chain plays on the default output. The waveform
 //! is the source's, so the timeline stays the source's time whatever the effects keep.
 //!
-//! ⚠ CLAUDE: NO HARDCODED UI STRINGS. Every user-visible string goes through the t() lookup with the key
+//! ⚠ NO HARDCODED UI STRINGS. Every user-visible string goes through the t() lookup with the key
 //! a string literal at the call site.
 
 use crate::{
